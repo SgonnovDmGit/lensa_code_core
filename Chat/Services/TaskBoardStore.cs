@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using SwanCode.Core.Chat.Models;
-using SwanCode.Core.Services.AppConfig;
+using LenSa.Core.Chat.Models;
+using LenSa.Core.Services.AppConfig;
 
-namespace SwanCode.Core.Chat.Services
+namespace LenSa.Core.Chat.Services
 {
     /// <summary>
     /// Локальное хранилище досок задач (T-000131): sessionId → строки доски.

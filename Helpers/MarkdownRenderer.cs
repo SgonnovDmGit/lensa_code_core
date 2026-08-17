@@ -8,7 +8,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 
-namespace SwanCode.Core.Helpers
+namespace LenSa.Core.Helpers
 {
     /// <summary>
     /// Лёгкий markdown → FlowDocument рендер для сообщений чата (T-000103).

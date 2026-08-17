@@ -3,7 +3,7 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
-namespace SwanCode.Core.Chat.Views
+namespace LenSa.Core.Chat.Views
 {
     /// <summary>
     /// «Призрак» перетаскиваемой строки под курсором (T-000127). Раньше drag&amp;drop был голый:

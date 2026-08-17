@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Input;
 
-namespace SwanCode.Core.Helpers
+namespace LenSa.Core.Helpers
 {
     public class RelayCommand : ICommand
     {

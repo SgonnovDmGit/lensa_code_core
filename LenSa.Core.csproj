@@ -5,15 +5,15 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
-    <RootNamespace>SwanCode.Core</RootNamespace>
-    <AssemblyName>SwanCode.Core</AssemblyName>
+    <RootNamespace>LenSa.Core</RootNamespace>
+    <AssemblyName>LenSa.Core</AssemblyName>
     <Version>0.1.0</Version>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>
     <Product>LenSa Core</Product>
     <Company>LenSa</Company>
     <!-- Символы внутрь сборки: клиенты пакуются в один self-contained .exe, и отдельный
-         SwanCode.Core.pdb рядом с ним ломает это «один файл». embedded, а не none —
+         LenSa.Core.pdb рядом с ним ломает это «один файл». embedded, а не none —
          номера строк в стек-трейсах остаются. -->
     <DebugType>embedded</DebugType>
     <Copyright>Copyright © LenSa 2026</Copyright>

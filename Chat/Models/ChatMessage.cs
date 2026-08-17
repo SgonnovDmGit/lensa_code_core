@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using SwanCode.Core.Helpers;
+using LenSa.Core.Helpers;
 
-namespace SwanCode.Core.Chat.Models
+namespace LenSa.Core.Chat.Models
 {
     public static class MessageRoles
     {

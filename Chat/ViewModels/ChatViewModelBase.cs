@@ -5,12 +5,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using SwanCode.Core.Chat.Models;
-using SwanCode.Core.Chat.Services;
-using SwanCode.Core.Helpers;
-using SwanCode.Core.Services.Api;
+using LenSa.Core.Chat.Models;
+using LenSa.Core.Chat.Services;
+using LenSa.Core.Helpers;
+using LenSa.Core.Services.Api;
 
-namespace SwanCode.Core.Chat.ViewModels
+namespace LenSa.Core.Chat.ViewModels
 {
     /// <summary>
     /// Базовый VM чата для продуктовых наследников (1С AiViewModel, Universal AiViewModel).

@@ -1,11 +1,11 @@
 using System;
 using System.Windows;
 
-namespace SwanCode.Core.Services.Theme
+namespace LenSa.Core.Services.Theme
 {
     /// <summary>
     /// Менеджер тем и языка. 3-индексное API: [themeIndex] тема + [coreStringsIndex] core-строки + [productStringsIndex] продуктовые строки.
-    /// Тема: Light/Dark берутся из SwanCode.Core, OneC — из продуктовой сборки (относительный URI резолвится её StartupUri).
+    /// Тема: Light/Dark берутся из LenSa.Core, OneC — из продуктовой сборки (относительный URI резолвится её StartupUri).
     /// Локализация: при смене языка одновременно подменяются core-строки и продуктовые строки.
     /// </summary>
     public static class ThemeManager
@@ -87,7 +87,7 @@ namespace SwanCode.Core.Services.Theme
             };
 
             var coreUri = new Uri(
-                $"pack://application:,,,/SwanCode.Core;component/Localization/Core.{langCode}.xaml",
+                $"pack://application:,,,/LenSa.Core;component/Localization/Core.{langCode}.xaml",
                 UriKind.Absolute);
             var productUri = new Uri(
                 $"pack://application:,,,/{_productAssemblyName};component/Localization/Strings.{langCode}.xaml",
@@ -104,16 +104,16 @@ namespace SwanCode.Core.Services.Theme
             return theme switch
             {
                 AppTheme.Light => new Uri(
-                    "pack://application:,,,/SwanCode.Core;component/Themes/ThemeLight.xaml",
+                    "pack://application:,,,/LenSa.Core;component/Themes/ThemeLight.xaml",
                     UriKind.Absolute),
                 AppTheme.Dark => new Uri(
-                    "pack://application:,,,/SwanCode.Core;component/Themes/ThemeDark.xaml",
+                    "pack://application:,,,/LenSa.Core;component/Themes/ThemeDark.xaml",
                     UriKind.Absolute),
                 AppTheme.OneC => new Uri(
                     $"pack://application:,,,/{_productAssemblyName};component/Themes/Theme1C.xaml",
                     UriKind.Absolute),
                 _ => new Uri(
-                    "pack://application:,,,/SwanCode.Core;component/Themes/ThemeLight.xaml",
+                    "pack://application:,,,/LenSa.Core;component/Themes/ThemeLight.xaml",
                     UriKind.Absolute)
             };
         }

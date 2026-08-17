@@ -1,9 +1,9 @@
-<UserControl x:Class="SwanCode.Core.Chat.Views.ChatInputBar"
+<UserControl x:Class="LenSa.Core.Chat.Views.ChatInputBar"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:helpers="clr-namespace:SwanCode.Core.Helpers"
+             xmlns:helpers="clr-namespace:LenSa.Core.Helpers"
              mc:Ignorable="d" d:DesignWidth="900">
     <!--
       Композер (мокап 2026-07-12, принят). Живёт ПОД лентой чата, внутри колонки чата —

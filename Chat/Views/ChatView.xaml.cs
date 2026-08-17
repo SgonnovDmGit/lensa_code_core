@@ -4,10 +4,10 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using SwanCode.Core.Chat.Models;
-using SwanCode.Core.Chat.ViewModels;
+using LenSa.Core.Chat.Models;
+using LenSa.Core.Chat.ViewModels;
 
-namespace SwanCode.Core.Chat.Views
+namespace LenSa.Core.Chat.Views
 {
     public partial class ChatView : UserControl
     {

@@ -2,10 +2,10 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using SwanCode.Core.Branding;
-using SwanCode.Core.Services.Api;
+using LenSa.Core.Branding;
+using LenSa.Core.Services.Api;
 
-namespace SwanCode.Core.Views
+namespace LenSa.Core.Views
 {
     public partial class LoginWindow : Window
     {

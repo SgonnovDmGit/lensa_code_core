@@ -3,7 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SwanCode.Core.Services.AppConfig
+namespace LenSa.Core.Services.AppConfig
 {
     public class AppConfig
     {

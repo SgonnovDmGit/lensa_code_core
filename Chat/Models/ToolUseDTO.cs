@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SwanCode.Core.Chat.Models
+namespace LenSa.Core.Chat.Models
 {
     public class ToolUseDTO
     {

@@ -1,4 +1,4 @@
-# SwanCode.Core
+# LenSa.Core
 
 Общая библиотека для клиентов Swan Code 1C ([swan_code_client](https://github.com/SgonnovDmGit/swan_code_client)) и Swan Code Universal ([swan_code_universal](https://github.com/SgonnovDmGit/swan_code_universal)).
 

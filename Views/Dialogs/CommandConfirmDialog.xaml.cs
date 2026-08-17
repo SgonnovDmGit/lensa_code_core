@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace SwanCode.Core.Views.Dialogs
+namespace LenSa.Core.Views.Dialogs
 {
     public partial class CommandConfirmDialog : Window
     {

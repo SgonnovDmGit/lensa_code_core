@@ -1,8 +1,8 @@
 using System;
 using System.Text.Json.Serialization;
-using SwanCode.Core.Chat.Models;
+using LenSa.Core.Chat.Models;
 
-namespace SwanCode.Core.Services.Api
+namespace LenSa.Core.Services.Api
 {
     public class ServiceInfo
     {
@@ -603,7 +603,7 @@ namespace SwanCode.Core.Services.Api
 
     /// <summary>
     /// Новая обёртка под ApiClient.PostToolResultsAsync — с ToolResultItem envelope
-    /// (SwanCode.Core.Chat.Models). Используется ChatViewModelBase. Старый
+    /// (LenSa.Core.Chat.Models). Используется ChatViewModelBase. Старый
     /// ChatToolResultsRequest с ToolResult остаётся для 1С AiViewModel до T-000048.
     /// </summary>
     public class ChatToolResultsEnvelope

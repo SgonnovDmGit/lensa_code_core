@@ -1,8 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
-using SwanCode.Core.Chat.Models;
+using LenSa.Core.Chat.Models;
 
-namespace SwanCode.Core.Chat.Views
+namespace LenSa.Core.Chat.Views
 {
     /// <summary>
     /// Селектор шаблонов сообщений — по ChatMessage.Role выбирает DataTemplate.

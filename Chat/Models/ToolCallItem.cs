@@ -1,6 +1,6 @@
-using SwanCode.Core.Helpers;
+using LenSa.Core.Helpers;
 
-namespace SwanCode.Core.Chat.Models
+namespace LenSa.Core.Chat.Models
 {
     /// <summary>
     /// Живое состояние вызова тула для карточки в чате (T-000074, DLemma-паттерн):

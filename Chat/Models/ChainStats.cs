@@ -1,6 +1,6 @@
 using System;
 
-namespace SwanCode.Core.Chat.Models
+namespace LenSa.Core.Chat.Models
 {
     /// <summary>
     /// Агрегат одного хода AI (T-000074): контент→тул→…→контент = одна цепочка.

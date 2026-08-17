@@ -4,9 +4,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
-using SwanCode.Core.Services.Theme;
+using LenSa.Core.Services.Theme;
 
-namespace SwanCode.Core.Helpers
+namespace LenSa.Core.Helpers
 {
     /// <summary>
     /// Конвертер AppTheme → локализованная строка (str_ThemeLight / str_ThemeDark / str_Theme1C).

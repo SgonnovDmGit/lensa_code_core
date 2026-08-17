@@ -1,7 +1,7 @@
 using System.Windows;
-using SwanCode.Core.Helpers;
+using LenSa.Core.Helpers;
 
-namespace SwanCode.Core.Chat.Models
+namespace LenSa.Core.Chat.Models
 {
     /// <summary>
     /// Статусы задачи со стороны AI (REQ-021). Отдельная ось от пользовательской

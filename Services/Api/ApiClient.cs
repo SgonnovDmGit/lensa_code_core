@@ -7,9 +7,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using SwanCode.Core.Chat.Models;
+using LenSa.Core.Chat.Models;
 
-namespace SwanCode.Core.Services.Api
+namespace LenSa.Core.Services.Api
 {
     public class ApiClient
     {
@@ -308,7 +308,7 @@ namespace SwanCode.Core.Services.Api
         }
 
         /// <summary>
-        /// Отправить tool-результаты (unified envelope из SwanCode.Core.Chat.Models.ToolResultItem).
+        /// Отправить tool-результаты (unified envelope из LenSa.Core.Chat.Models.ToolResultItem).
         /// Используется ChatViewModelBase после DispatchToolUsesAsync. Ответ — стандартный
         /// ChatToolRetryResponse (следующий assistant-ход с возможными новыми toolUses[]).
         /// Old SendChatToolResultsAsync с legacy ToolResult остаётся для 1С AiViewModel до T-000048.

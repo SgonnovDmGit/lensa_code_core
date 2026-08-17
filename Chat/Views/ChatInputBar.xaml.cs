@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
-namespace SwanCode.Core.Chat.Views
+namespace LenSa.Core.Chat.Views
 {
     /// <summary>
     /// Композер: живёт под лентой чата, внутри колонки чата (T-000121). DataContext —

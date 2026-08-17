@@ -1,4 +1,4 @@
-namespace SwanCode.Core.Branding
+namespace LenSa.Core.Branding
 {
     /// <summary>
     /// Описывает product-specific брендинг, который ядро (Core) не знает в compile-time:

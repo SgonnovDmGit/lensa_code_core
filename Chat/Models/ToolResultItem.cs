@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace SwanCode.Core.Chat.Models
+namespace LenSa.Core.Chat.Models
 {
     public static class ToolResultStatus
     {

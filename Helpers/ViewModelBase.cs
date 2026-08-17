@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace SwanCode.Core.Helpers
+namespace LenSa.Core.Helpers
 {
     public abstract class ViewModelBase : INotifyPropertyChanged
     {

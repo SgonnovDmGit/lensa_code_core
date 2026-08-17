@@ -1,4 +1,4 @@
-<Window x:Class="SwanCode.Core.Views.Dialogs.ErrorExplainDialog"
+<Window x:Class="LenSa.Core.Views.Dialogs.ErrorExplainDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="{DynamicResource str_ErrorExplainTitle}"
