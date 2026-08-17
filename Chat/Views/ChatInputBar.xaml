@@ -292,9 +292,15 @@
                         <Grid Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0"
                               VerticalAlignment="Center" Background="Transparent"
                               ToolTipService.InitialShowDelay="150">
+                            <!-- Фон и дуга — ОДНО кольцо двумя примитивами (T-000165).
+                                 23.2 = 2*R + StrokeThickness при R=10 из PercentToArcConverter;
+                                 центр обоих = 12. Меняешь одно — меняй и конвертер. -->
                             <Ellipse Stroke="{DynamicResource BorderColor}" StrokeThickness="3.2"
-                                     Width="21.5" Height="21.5" Opacity="0.7"/>
-                            <Path StrokeThickness="3.2"
+                                     Width="23.2" Height="23.2" Opacity="0.7"/>
+                            <!-- Явные размеры + Stretch=None: иначе WPF выравнивает Path по его
+                                 собственным габаритам и добавляет свой сдвиг поверх координат. -->
+                            <Path StrokeThickness="3.2" Width="24" Height="24" Stretch="None"
+                                  HorizontalAlignment="Left" VerticalAlignment="Top"
                                   StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                                   Data="{Binding ActiveChat.ContextFillPercent, Converter={StaticResource PercentToArc}}">
                                 <Path.Style>
@@ -385,6 +391,33 @@
                                   Fill="{DynamicResource SecondaryForeground}"
                                   Data="M4,11H20V13H4V11M12,10L8,6H11V2H13V6H16L12,10M12,14L16,18H13V22H11V18H8L12,14Z"/>
                         </Button>
+
+                        <!-- === Счётчик длины сообщения (T-000163, ANNOUNCE-002) ===
+                             Появляется только с 90% лимита: висеть всё время он не должен —
+                             обычное сообщение короче в сотни раз, и постоянный счётчик был бы
+                             шумом. Красный = отправка заблокирована (CanExecute команды).
+                             Текст в поле при этом НЕ обрезается: пользователь сам решает,
+                             что выкинуть. FallbackValue=Collapsed — у продукта, где биндинг
+                             не разрешится, счётчика просто не будет. -->
+                        <TextBlock Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Margin="8,0,10,0" FontSize="11"
+                                   Text="{Binding ActiveChat.InputCounterText}"
+                                   ToolTip="{DynamicResource str_InputLimitHint}"
+                                   ToolTipService.InitialShowDelay="150"
+                                   Visibility="{Binding ActiveChat.ShowInputCounter,
+                                                Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource SecondaryForeground}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ActiveChat.IsInputOverLimit}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource ErrorColor}"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
 
                         <!-- === Чип режима (только 1С-клиент: ShowModeChip=True) === -->
                         <ToggleButton x:Name="ModeChip" Grid.Column="3"

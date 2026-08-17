@@ -229,7 +229,20 @@ namespace LenSa.Core.Helpers
     /// </summary>
     public class PercentToArcConverter : IValueConverter
     {
-        private const double Cx = 13.5, Cy = 13.5, R = 10.5;
+        // Геометрия кольца контекста. Должна совпадать с фоновым Ellipse в ChatInputBar.xaml —
+        // это ОДНО кольцо, нарисованное двумя примитивами, и любое расхождение видно глазом.
+        //
+        // Держатся вместе так (сетка 24×24, штрих 3.2):
+        //   центр   = 24 / 2                      = 12
+        //   радиус  = 10  (осевая линия штриха)
+        //   Ellipse = 2*R + StrokeThickness = 23.2  ← его Width/Height в XAML
+        //   габарит = 12 ± (10 + 3.2/2) = 0.4..23.6 — влезает в 24 без обрезки
+        //
+        // Было Cx=Cy=13.5, R=10.5 — расчёт под сетку 27×27. Кольцо потом ужали до 24,
+        // фоновый Ellipse подогнали, а конвертер забыли: дуга оказалась крупнее фона на
+        // 1.35 px и смещена на 1.5 px по обеим осям (T-000165). Меняешь размер кольца —
+        // меняй ОБА места, иначе дефект вернётся.
+        private const double Cx = 12.0, Cy = 12.0, R = 10.0;
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

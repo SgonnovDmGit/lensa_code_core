@@ -108,8 +108,31 @@ namespace LenSa.Core.Chat.ViewModels
         public string InputText
         {
             get => _inputText;
-            set => SetProperty(ref _inputText, value);
+            set
+            {
+                if (!SetProperty(ref _inputText, value)) return;
+                OnPropertyChanged(nameof(InputLength));
+                OnPropertyChanged(nameof(IsInputOverLimit));
+                OnPropertyChanged(nameof(ShowInputCounter));
+                OnPropertyChanged(nameof(InputCounterText));
+                // Отправка блокируется при превышении лимита — без форса кнопка
+                // остаётся активной до следующего input-события (та же причина, что в IsBusy).
+                System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+            }
         }
+
+        // --- Лимит длины сообщения (T-000163, ANNOUNCE-002) -------------------
+        // Поле ввода НЕ обрезаем (никакого MaxLength): вставка большого куска модуля —
+        // ровно наш кейс, и молча уехавшая половина хуже честного отказа (урок T-000158).
+        // Вместо этого показываем счётчик и не даём отправить.
+
+        public int InputLength => _inputText.Length;
+
+        public bool IsInputOverLimit => InputLength > ChatLimits.MaxMessageChars;
+
+        public bool ShowInputCounter => InputLength >= ChatLimits.CounterVisibleFrom;
+
+        public string InputCounterText => $"{InputLength:N0} / {ChatLimits.MaxMessageChars:N0}";
 
         public bool IsBusy
         {
@@ -165,9 +188,11 @@ namespace LenSa.Core.Chat.ViewModels
         {
             Api = api ?? throw new ArgumentNullException(nameof(api));
 
+            // Лимит длины гасит и кнопку, и Enter разом: композер жмёт Enter через
+            // SendButton.Command.CanExecute, так что второй проверки в code-behind не нужно.
             SendMessageCommand = new RelayCommand(
                 () => _ = SendMessageAsync(InputText, "free_form"),
-                () => !string.IsNullOrWhiteSpace(InputText) && !IsBusy);
+                () => !string.IsNullOrWhiteSpace(InputText) && !IsBusy && !IsInputOverLimit);
 
             // T-000133: сжать контекст руками, не дожидаясь автотриггера у самого потолка.
             CompactContextCommand = new RelayCommand(
@@ -1212,16 +1237,58 @@ namespace LenSa.Core.Chat.ViewModels
         // --- Error hooks -----------------------------------------------------
 
         /// <summary>
+        /// Коды ошибок, общие для ВСЕХ продуктов, — единственное место, где они маппятся
+        /// в человеческий текст (T-000163, ANNOUNCE-002).
+        ///
+        /// Живёт здесь, а не в продуктовом наследнике, потому что наследники переопределяют
+        /// <see cref="OnApiExceptionAsync"/> целиком и base не зовут: продублируй switch —
+        /// и следующий общий код ошибки разъедется по продуктам. Наследник обязан позвать
+        /// этот метод ПЕРВЫМ и, если вернулся не-null, взять его результат.
+        ///
+        /// Возвращает null, если код не наш, — тогда решает наследник.
+        /// </summary>
+        protected static string? MapCommonError(ApiException ex)
+        {
+            var key = ex.ErrorCode switch
+            {
+                // 400: message длиннее серверного лимита
+                "MESSAGE_TOO_LONG" => "str_ErrorMessageTooLong",
+                // 413: тело запроса больше транспортного капа (256 KB / 4 MB на tool-results)
+                "REQUEST_TOO_LARGE" => "str_ErrorRequestTooLarge",
+                _ => null
+            };
+            if (key is null) return null;
+
+            if (System.Windows.Application.Current?.TryFindResource(key) is not string template
+                || template.Length == 0)
+                return null;
+
+            // Серверный текст несёт живые цифры (лимит и фактическую длину), а наш лимит —
+            // всего лишь подсказка и может разойтись с настройкой сервера. Поэтому цифру
+            // берём ИЗ ОТВЕТА, а локализованная строка её только обрамляет.
+            try
+            {
+                return string.Format(template, ex.Message);
+            }
+            catch (FormatException)
+            {
+                // Кривой плейсхолдер в переводе не должен ронять обработчик ошибки —
+                // это был бы отказ поверх отказа. Отдаём хотя бы текст сервера.
+                return $"{template} {ex.Message}";
+            }
+        }
+
+        /// <summary>
         /// Обработка ApiException. Наследник переопределяет для локализации сообщений
         /// и специальных action'ов (например, RequestLogout на UNAUTHORIZED).
-        /// Default: добавить assistant-сообщение с текстом ошибки.
+        /// Default: общий маппинг, иначе — текст ошибки как есть.
         /// </summary>
         protected virtual Task OnApiExceptionAsync(ApiException ex)
         {
             Messages.Add(new ChatMessage
             {
                 Role = MessageRoles.Assistant,
-                Content = $"⚠ {ex.ErrorCode}: {ex.Message}"
+                Content = $"⚠ {MapCommonError(ex) ?? $"{ex.ErrorCode}: {ex.Message}"}"
             });
             return Task.CompletedTask;
         }

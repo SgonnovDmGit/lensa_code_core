@@ -137,4 +137,11 @@
     <sys:String x:Key="str_ContextCompactedFmt">Контекст сжат: {0:N0} → ~{1:N0} токенов</sys:String>
     <sys:String x:Key="str_ContextCompacted">Контекст сжат</sys:String>
     <sys:String x:Key="str_CompactBelowFloor">Сжимать пока нечего — контекст ещё не набрался.</sys:String>
+
+    <!-- Входные лимиты сервера (T-000163, ANNOUNCE-002, сервер v0.85.0).
+         {0} — текст сервера: в нём живые лимит и фактическая длина. Наша константа
+         может разойтись с настройкой сервера, поэтому цифру подставляет сервер. -->
+    <sys:String x:Key="str_ErrorMessageTooLong">Сообщение длиннее лимита сервера — оно не отправлено. {0}</sys:String>
+    <sys:String x:Key="str_ErrorRequestTooLarge">Запрос слишком большой для сервера. Если это чтение модуля — попросите AI взять его частями. {0}</sys:String>
+    <sys:String x:Key="str_InputLimitHint">Длина сообщения. Сервер принимает не больше 64 000 символов — при превышении отправка блокируется, но текст остаётся на месте: решайте сами, что сократить.</sys:String>
 </ResourceDictionary>

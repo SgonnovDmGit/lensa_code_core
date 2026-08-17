@@ -137,4 +137,11 @@
     <sys:String x:Key="str_ContextCompactedFmt">Context compacted: {0:N0} → ~{1:N0} tokens</sys:String>
     <sys:String x:Key="str_ContextCompacted">Context compacted</sys:String>
     <sys:String x:Key="str_CompactBelowFloor">Nothing to compact yet — the context is still small.</sys:String>
+
+    <!-- Server input limits (T-000163, ANNOUNCE-002, server v0.85.0).
+         {0} is the server's own text — it carries the live limit and the actual length.
+         Our constant may drift from the server setting, so the number comes from the server. -->
+    <sys:String x:Key="str_ErrorMessageTooLong">The message is longer than the server limit and was not sent. {0}</sys:String>
+    <sys:String x:Key="str_ErrorRequestTooLarge">The request is too large for the server. If this is a module read, ask the AI to take it in parts. {0}</sys:String>
+    <sys:String x:Key="str_InputLimitHint">Message length. The server accepts at most 64,000 characters — sending is blocked above that, but your text stays put: you decide what to cut.</sys:String>
 </ResourceDictionary>

@@ -13,13 +13,33 @@ namespace LenSa.Core.Services.Api
         public string? ErrorCode { get; set; }
     }
 
+    /// <summary>
+    /// Входные лимиты chat-семейства (ANNOUNCE-002, сервер v0.85.0).
+    ///
+    /// ВАЖНО: это НЕ истина, а подсказка. Настоящий лимит живёт на сервере
+    /// (админ-настройка chat.max_message_chars с hot-reload) и может разойтись с нашим
+    /// числом в любой момент. Ручки «спросить лимит» в контракте нет — сервер сообщает
+    /// его только в ответе на превышение, текстом. Поэтому:
+    ///   • это значение служит ТОЛЬКО чтобы предупредить пользователя ДО отправки;
+    ///   • при 400 MESSAGE_TOO_LONG показываем СЕРВЕРНЫЙ текст с его цифрой, а не свою.
+    /// </summary>
+    public static class ChatLimits
+    {
+        /// <summary>Дефолт сервера на длину message. Символы, не байты.</summary>
+        public const int MaxMessageChars = 64_000;
+
+        /// <summary>С этой длины показываем счётчик — 90% лимита.</summary>
+        public const int CounterVisibleFrom = (int)(MaxMessageChars * 0.9);
+    }
+
     public class ChatRequest
     {
         [JsonPropertyName("sessionId")]
         public string SessionId { get; set; } = string.Empty;
 
-        // Провайдер один канонический (SwanCode), сервер значение игнорирует с v0.40.0
-        // и поле опционально с v0.47.0 — не шлём лишнего: пустое опускается.
+        // Провайдер убран из контракта (ANNOUNCE-001): значение сервер игнорирует с v0.40.0,
+        // поле опционально с v0.47.0, а GET /v1/api/providers deprecated и отдаёт ["LenSA"].
+        // Не шлём лишнего: пустое опускается.
         [JsonPropertyName("provider")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public string Provider { get; set; } = string.Empty;
@@ -499,7 +519,7 @@ namespace LenSa.Core.Services.Api
 
     public class UsageEntry
     {
-        // provider убран с v0.40.0 (ANNOUNCE-005) — Router-канонический SwanCode всегда
+        // provider убран с v0.40.0 (ANNOUNCE-005) — провайдер канонический всегда
 
         [JsonPropertyName("model")]
         public string Model { get; set; } = string.Empty;
@@ -542,7 +562,7 @@ namespace LenSa.Core.Services.Api
 
     public class RecommendationDto
     {
-        // provider убран с v0.40.0 (ANNOUNCE-005) — Router-канонический SwanCode всегда
+        // provider убран с v0.40.0 (ANNOUNCE-005) — провайдер канонический всегда
 
         [JsonPropertyName("modelId")]
         public string ModelId { get; set; } = string.Empty;

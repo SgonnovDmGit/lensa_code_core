@@ -81,7 +81,8 @@ namespace LenSa.Core.Services.Api
 
         public async Task<ModelDto[]> GetModelsAsync(string provider)
         {
-            // С v0.40.0 (ANNOUNCE-005) path-параметр {provider} игнорируется — Router-канонический SwanCode.
+            // С v0.40.0 (ANNOUNCE-005) path-параметр {provider} игнорируется: провайдер
+            // канонический, а с ANNOUNCE-001 понятие провайдера убрано из контракта вовсе.
             // GetProvidersAsync / GetBalanceAsync удалены (T-000068): UI выбора провайдера убран,
             // баланс всегда GetMeAsync().BalanceCoins (внутренние монеты).
             using var request = CreateRequest(HttpMethod.Get, $"/v1/api/models/{Uri.EscapeDataString(provider)}");
