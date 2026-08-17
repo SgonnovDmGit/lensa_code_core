@@ -1,6 +1,6 @@
 # LenSa.Core
 
-Общая библиотека для клиентов Swan Code 1C ([swan_code_client](https://github.com/SgonnovDmGit/swan_code_client)) и Swan Code Universal ([swan_code_universal](https://github.com/SgonnovDmGit/swan_code_universal)).
+Общая библиотека для клиентов LenSa Dev 1С ([lensa_code_client](https://github.com/SgonnovDmGit/lensa_code_client)) и LenSa Universal ([lensa_code_universal](https://github.com/SgonnovDmGit/lensa_code_universal)).
 
 ## Содержимое
 
@@ -9,7 +9,7 @@
 - Services/Auth — Phase 5a auth (OTP + UserKey)
 - Services/AppConfig — настройки приложения (window.json и т.п.)
 - Services/Theme — ThemeManager
-- Themes — Light + Dark (1C тема — только в swan_code_client)
+- Themes — Light + Dark (1C тема — только в lensa_code_client)
 - Views — LoginWindow, Dialogs
 - Chat — ChatViewModelBase + ChatView (общий чат-каркас)
 - Branding — IProductBranding (display name, акцентный цвет per product)
