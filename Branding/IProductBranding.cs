@@ -3,12 +3,13 @@ namespace LenSa.Core.Branding
     /// <summary>
     /// Описывает product-specific брендинг, который ядро (Core) не знает в compile-time:
     /// человекочитаемое имя продукта, product-key для отправки на сервер (X-Product-Key),
-    /// акцентный цвет UI. В v0.11.0 — только swan_code_client (1С) и swan_code_universal.
+    /// акцентный цвет UI. Реализации — lensa_code_client (1С) и lensa_code_universal.
     /// </summary>
     public interface IProductBranding
     {
         /// <summary>
-        /// Машинный ключ продукта (например, "swan_code_client" или "swan_code_universal").
+        /// Машинный ключ продукта: секрет вида `lens_pk_*`, выданный сервером на продукт
+        /// (ранее выпущенные `swan_pk_*` принимаются бессрочно). Вшивается при публикации.
         /// Уходит на сервер заголовком X-Product-Key.
         /// </summary>
         string ProductKey { get; }

@@ -29,7 +29,7 @@ namespace LenSa.Core.Services.Theme
         /// <param name="themeIndex">Индекс MergedDictionary с темой (обычно 0).</param>
         /// <param name="coreStringsIndex">Индекс MergedDictionary с core-локализацией (обычно 1).</param>
         /// <param name="productStringsIndex">Индекс MergedDictionary с продуктовой локализацией (обычно 2).</param>
-        /// <param name="productAssemblyName">Имя продуктовой сборки для pack URI (например, "swan_code_client").</param>
+        /// <param name="productAssemblyName">Имя продуктовой сборки для pack URI (например, "LenSaDev1C").</param>
         public static void Initialize(
             ResourceDictionary appResources,
             int themeIndex,
