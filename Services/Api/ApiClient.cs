@@ -13,6 +13,26 @@ namespace LenSa.Core.Services.Api
 {
     public class ApiClient
     {
+        /// <summary>
+        /// Сериализация тела запросов (T-000163).
+        ///
+        /// **Не убирать.** Дефолтный энкодер System.Text.Json экранирует всё не-ASCII в
+        /// `\uXXXX` — это **6 байт на символ кириллицы** вместо двух в UTF-8. Замер:
+        /// 64 000 символов кириллицы дают 384 014 байт тела при дефолте и 128 014 с этим
+        /// энкодером. Транспортный кап сервера — 262 144 байта, то есть на дефолте в него
+        /// влезало лишь ~43 000 символов, и заявленный сервером лимит в 64 000 был
+        /// недостижим в принципе: пользователь получал 413 REQUEST_TOO_LARGE на тексте,
+        /// который обязан был пройти.
+        ///
+        /// Берём `Create(UnicodeRanges.All)`, а НЕ `UnsafeRelaxedJsonEscaping`: выигрыш в
+        /// размере тот же, но `&lt;`, `&gt;`, `&amp;`, `'` остаются экранированными.
+        /// </summary>
+        private static readonly JsonSerializerOptions BodyJson = new()
+        {
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(
+                System.Text.Unicode.UnicodeRanges.All)
+        };
+
         private readonly HttpClient _http;
         private string _baseUrl;
 
@@ -93,7 +113,7 @@ namespace LenSa.Core.Services.Api
         public async Task<ChatResponse> SendChatAsync(ChatRequest chatRequest)
         {
             using var request = CreateRequest(HttpMethod.Post, "/v1/api/chat");
-            var json = JsonSerializer.Serialize(chatRequest);
+            var json = JsonSerializer.Serialize(chatRequest, BodyJson);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             return await SendAsync<ChatResponse>(request);
         }
@@ -114,7 +134,7 @@ namespace LenSa.Core.Services.Api
             chatRequest.AsyncWaitMs = asyncWaitMs;
 
             using var request = CreateRequest(HttpMethod.Post, "/v1/api/chat/async");
-            var json = JsonSerializer.Serialize(chatRequest);
+            var json = JsonSerializer.Serialize(chatRequest, BodyJson);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
             HttpResponseMessage submitResponse;
@@ -303,7 +323,7 @@ namespace LenSa.Core.Services.Api
         public async Task<ChatToolRetryResponse> SendChatToolResultsAsync(ChatToolResultsRequest resultsRequest)
         {
             using var request = CreateRequest(HttpMethod.Post, "/v1/api/chat/tool-results");
-            var json = JsonSerializer.Serialize(resultsRequest);
+            var json = JsonSerializer.Serialize(resultsRequest, BodyJson);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             return await SendAsync<ChatToolRetryResponse>(request);
         }
@@ -328,7 +348,7 @@ namespace LenSa.Core.Services.Api
                 AssistMode = assistMode,
                 ClientTools = clientTools
             };
-            var json = JsonSerializer.Serialize(body);
+            var json = JsonSerializer.Serialize(body, BodyJson);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
             return await SendAsync<ChatToolRetryResponse>(request);
         }
