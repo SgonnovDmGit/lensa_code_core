@@ -107,16 +107,16 @@ namespace LenSa.Core.Services.Api
             }
         }
 
-        public async Task<ModelDto[]> GetModelsAsync(string provider)
+        public async Task<ModelDto[]> GetModelsAsync()
         {
-            // С v0.40.0 (ANNOUNCE-005) path-параметр {provider} игнорируется: провайдер
-            // канонический, а с ANNOUNCE-001 понятие провайдера убрано из контракта вовсе.
-            // GetProvidersAsync / GetBalanceAsync удалены (T-000068): UI выбора провайдера убран,
-            // баланс всегда GetMeAsync().BalanceCoins (внутренние монеты).
-            using var request = CreateRequest(HttpMethod.Get, $"/v1/api/models/{Uri.EscapeDataString(provider)}");
+            // The canonical catalog route has no provider segment; the server filters availability.
+            using var request = CreateRequest(HttpMethod.Get, "/v1/api/models");
             var result = await SendAsync<ModelsResponse>(request);
             return result.Models;
         }
+
+        /// <summary>Compatibility overload; model catalog is canonical and has no provider route.</summary>
+        public Task<ModelDto[]> GetModelsAsync(string provider) => GetModelsAsync();
 
         public async Task<ChatResponse> SendChatAsync(ChatRequest chatRequest)
         {
