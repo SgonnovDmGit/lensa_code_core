@@ -576,8 +576,19 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="ℹ" Margin="0,0,8,0" VerticalAlignment="Center"
-                                   Foreground="{DynamicResource SecondaryForeground}"/>
+                        <TextBlock Margin="0,0,8,0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SecondaryForeground}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="ℹ"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsInterrupted}" Value="True">
+                                            <Setter Property="Text" Value="⏹"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                         <TextBlock Grid.Column="1" Text="{Binding Content}" TextWrapping="Wrap"
                                    Foreground="{DynamicResource SecondaryForeground}"/>
                     </Grid>

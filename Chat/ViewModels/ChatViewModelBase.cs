@@ -208,6 +208,11 @@ namespace LenSa.Core.Chat.ViewModels
             }
         }
 
+        /// <summary>Cancellation token for the active user send, or None for legacy/external calls.</summary>
+        protected CancellationToken CurrentTurnCancellationToken => _currentSendCts?.Token ?? CancellationToken.None;
+
+        protected void ThrowIfCurrentTurnCancellationRequested() => CurrentTurnCancellationToken.ThrowIfCancellationRequested();
+
         public ICommand SendMessageCommand { get; }
         public ICommand NewChatCommand { get; }
 
@@ -934,10 +939,18 @@ namespace LenSa.Core.Chat.ViewModels
         protected async Task DispatchToolUsesAsync(IReadOnlyList<ToolUseDTO> toolUses)
         {
             if (toolUses == null || toolUses.Count == 0) return;
+            var cancellationToken = CurrentTurnCancellationToken;
 
             var results = new List<ToolResultItem>(toolUses.Count);
-            foreach (var toolUse in toolUses)
+            for (var index = 0; index < toolUses.Count; index++)
             {
+                var toolUse = toolUses[index];
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    MarkUnexecutedToolCalls(toolUses, index);
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
                 var call = FindToolCall(toolUse.Id);
                 ToolResultItem result;
                 if (_toolHandlers.TryGetValue(toolUse.Name, out var handler))
@@ -987,9 +1000,30 @@ namespace LenSa.Core.Chat.ViewModels
                         : ToolCallItem.StatusDone;
                     call.ResultMessage = result.Message;
                 }
+
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    MarkUnexecutedToolCalls(toolUses, index + 1);
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             await PostToolResultsAsync(results);
+        }
+
+        private void MarkUnexecutedToolCalls(IReadOnlyList<ToolUseDTO> toolUses, int startIndex)
+        {
+            var text = System.Windows.Application.Current?.TryFindResource("str_Chat_ToolNotRunAfterInterrupt") as string
+                ?? "Not executed because the turn was interrupted.";
+            for (var index = startIndex; index < toolUses.Count; index++)
+            {
+                var call = FindToolCall(toolUses[index].Id);
+                if (call == null) continue;
+                call.Status = ToolCallItem.StatusFailed;
+                call.ResultMessage = text;
+            }
         }
 
         private ToolCallItem? FindToolCall(string toolUseId)
@@ -1015,19 +1049,36 @@ namespace LenSa.Core.Chat.ViewModels
         /// </summary>
         protected virtual string? AssistMode => null;
 
-        protected virtual async Task PostToolResultsAsync(IReadOnlyList<ToolResultItem> results)
+        protected virtual Task PostToolResultsAsync(IReadOnlyList<ToolResultItem> results) =>
+            PostToolResultsCoreAsync(results, CurrentTurnCancellationToken);
+
+        private async Task PostToolResultsCoreAsync(
+            IReadOnlyList<ToolResultItem> results,
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(SessionId) || results.Count == 0) return;
 
             BeginToolContinuation();
             try
             {
-                var retry = await Api.PostToolResultsAsync(SessionId, results, AssistMode, ClientTools);
+                cancellationToken.ThrowIfCancellationRequested();
+                var retry = await Api.PostToolResultsAsync(SessionId, results, AssistMode, ClientTools, cancellationToken);
                 if (!string.IsNullOrEmpty(retry.SessionId))
                     SessionId = retry.SessionId;
 
                 EndToolContinuation();
+                cancellationToken.ThrowIfCancellationRequested();
                 await HandleToolRetryResponseAsync(retry);
+            }
+            catch (ChatTurnCanceledException)
+            {
+                EndToolContinuation();
+                throw;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                EndToolContinuation();
+                throw;
             }
             catch (ApiException ex)
             {
@@ -1080,6 +1131,7 @@ namespace LenSa.Core.Chat.ViewModels
         /// </summary>
         protected virtual async Task HandleToolRetryResponseAsync(ChatToolRetryResponse retry)
         {
+            ThrowIfCurrentTurnCancellationRequested();
             var msg = BuildAssistantMessage(
                 content: retry.Content,
                 model: retry.Model,
@@ -1126,6 +1178,7 @@ namespace LenSa.Core.Chat.ViewModels
 
             await ProcessToolRetryLegacyChannelsAsync(retry);
 
+            ThrowIfCurrentTurnCancellationRequested();
             if (retry.ToolUses is { Length: > 0 })
                 await DispatchToolUsesAsync(retry.ToolUses);
         }
@@ -1174,6 +1227,7 @@ namespace LenSa.Core.Chat.ViewModels
 
                 var request = BuildRequest(outgoing, promptCode);
                 var response = await Api.SendChatAsyncAsync(request, cancellationToken: cts.Token);
+                cts.Token.ThrowIfCancellationRequested();
 
                 if (!string.IsNullOrEmpty(response.SessionId))
                     SessionId = response.SessionId;
@@ -1211,10 +1265,24 @@ namespace LenSa.Core.Chat.ViewModels
         /// </summary>
         protected virtual Task OnChatInterruptedAsync()
         {
+            if (_activeToolCallsMessage != null)
+            {
+                var notRun = System.Windows.Application.Current?.TryFindResource("str_Chat_ToolNotRunAfterInterrupt") as string
+                    ?? "Not executed because the turn was interrupted.";
+                foreach (var call in _activeToolCallsMessage.ToolCalls)
+                {
+                    if (call.Status != ToolCallItem.StatusRunning) continue;
+                    call.Status = ToolCallItem.StatusFailed;
+                    call.ResultMessage = notRun;
+                }
+            }
+
             Messages.Add(new ChatMessage
             {
-                Role = MessageRoles.Debug,
-                Content = "⏹ Прервано пользователем"
+                Role = MessageRoles.Notice,
+                Content = System.Windows.Application.Current?.TryFindResource("str_Chat_InterruptedNotice") as string
+                    ?? "Interrupted — remaining tools were not run.",
+                IsInterrupted = true
             });
             return Task.CompletedTask;
         }
@@ -1248,8 +1316,10 @@ namespace LenSa.Core.Chat.ViewModels
             AttachToolCalls(msg);
             ChainAccumulate(msg, isFinal: response.ToolUses is not { Length: > 0 });
 
+            ThrowIfCurrentTurnCancellationRequested();
             await ProcessLegacyChannelsAsync(response);
 
+            ThrowIfCurrentTurnCancellationRequested();
             if (response.ToolUses is { Length: > 0 })
                 await DispatchToolUsesAsync(response.ToolUses);
         }

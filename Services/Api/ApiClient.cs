@@ -345,11 +345,19 @@ namespace LenSa.Core.Services.Api
         /// ChatToolRetryResponse (следующий assistant-ход с возможными новыми toolUses[]).
         /// Old SendChatToolResultsAsync с legacy ToolResult остаётся для 1С AiViewModel до T-000048.
         /// </summary>
-        public async Task<ChatToolRetryResponse> PostToolResultsAsync(
+        public Task<ChatToolRetryResponse> PostToolResultsAsync(
             string sessionId,
             IReadOnlyList<ToolResultItem> results,
             string? assistMode = null,
-            string[]? clientTools = null)
+            string[]? clientTools = null) =>
+            PostToolResultsAsync(sessionId, results, assistMode, clientTools, CancellationToken.None);
+
+        public async Task<ChatToolRetryResponse> PostToolResultsAsync(
+            string sessionId,
+            IReadOnlyList<ToolResultItem> results,
+            string? assistMode,
+            string[]? clientTools,
+            CancellationToken cancellationToken)
         {
             using var request = CreateRequest(HttpMethod.Post, "/v1/api/chat/tool-results");
             var body = new ChatToolResultsEnvelope
@@ -361,7 +369,7 @@ namespace LenSa.Core.Services.Api
             };
             var json = JsonSerializer.Serialize(body, BodyJson);
             request.Content = new StringContent(json, Encoding.UTF8, "application/json");
-            return await SendAsync<ChatToolRetryResponse>(request);
+            return await SendAsync<ChatToolRetryResponse>(request, cancellationToken);
         }
 
         // --- История диалогов (T-000106) ----------------------------------
@@ -434,12 +442,16 @@ namespace LenSa.Core.Services.Api
             return request;
         }
 
-        private async Task<T> SendAsync<T>(HttpRequestMessage request)
+        private async Task<T> SendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default)
         {
             HttpResponseMessage response;
             try
             {
-                response = await _http.SendAsync(request);
+                response = await _http.SendAsync(request, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
             }
             catch (HttpRequestException ex)
             {
@@ -450,30 +462,33 @@ namespace LenSa.Core.Services.Api
                 throw new ApiException("TIMEOUT", "Request timed out");
             }
 
-            var body = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
+            using (response)
             {
-                try
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
                 {
-                    var error = JsonSerializer.Deserialize<ErrorResponse>(body);
-                    if (error?.ServiceInfo != null)
-                        throw new ApiException(
-                            error.ServiceInfo.ErrorCode ?? "UNKNOWN",
-                            error.Message ?? response.ReasonPhrase ?? "Unknown error");
+                    try
+                    {
+                        var error = JsonSerializer.Deserialize<ErrorResponse>(body);
+                        if (error?.ServiceInfo != null)
+                            throw new ApiException(
+                                error.ServiceInfo.ErrorCode ?? "UNKNOWN",
+                                error.Message ?? response.ReasonPhrase ?? "Unknown error");
+                    }
+                    catch (JsonException) { }
+
+                    throw new ApiException(
+                        $"HTTP_{(int)response.StatusCode}",
+                        response.ReasonPhrase ?? "Unknown error");
                 }
-                catch (JsonException) { }
 
-                throw new ApiException(
-                    $"HTTP_{(int)response.StatusCode}",
-                    response.ReasonPhrase ?? "Unknown error");
+                var result = JsonSerializer.Deserialize<T>(body);
+                if (result == null)
+                    throw new ApiException("PARSE_ERROR", "Failed to parse response");
+
+                return result;
             }
-
-            var result = JsonSerializer.Deserialize<T>(body);
-            if (result == null)
-                throw new ApiException("PARSE_ERROR", "Failed to parse response");
-
-            return result;
         }
     }
 }

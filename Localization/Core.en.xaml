@@ -46,6 +46,8 @@
     <sys:String x:Key="str_Chat_SendButton">Send</sys:String>
     <sys:String x:Key="str_Chat_NewChat">New dialog</sys:String>
     <sys:String x:Key="str_Chat_Interrupt">Interrupt</sys:String>
+    <sys:String x:Key="str_Chat_InterruptedNotice">Interrupted — remaining tools were not run.</sys:String>
+    <sys:String x:Key="str_Chat_ToolNotRunAfterInterrupt">Not executed because the turn was interrupted.</sys:String>
 
     <!-- Assistant states -->
     <sys:String x:Key="str_Chat_Streaming">streaming</sys:String>

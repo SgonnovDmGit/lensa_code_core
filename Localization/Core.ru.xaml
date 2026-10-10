@@ -46,6 +46,8 @@
     <sys:String x:Key="str_Chat_SendButton">Отправить</sys:String>
     <sys:String x:Key="str_Chat_NewChat">Новый диалог</sys:String>
     <sys:String x:Key="str_Chat_Interrupt">Прервать</sys:String>
+    <sys:String x:Key="str_Chat_InterruptedNotice">Прервано — оставшиеся инструменты не выполнялись.</sys:String>
+    <sys:String x:Key="str_Chat_ToolNotRunAfterInterrupt">Не выполнено: ход прерван.</sys:String>
 
     <!-- Assistant states -->
     <sys:String x:Key="str_Chat_Streaming">стрим</sys:String>
