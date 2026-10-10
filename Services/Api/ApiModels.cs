@@ -126,6 +126,7 @@ namespace LenSa.Core.Services.Api
         public const string Completed = "completed";
         public const string Failed = "failed";
         public const string Abandoned = "abandoned";
+        public const string Canceled = "canceled";
     }
 
     /// <summary>
@@ -466,6 +467,9 @@ namespace LenSa.Core.Services.Api
         [JsonPropertyName("retryExhausted")]
         public bool RetryExhausted { get; set; }
 
+        [JsonPropertyName("lastFailure")]
+        public ChatToolLastFailure? LastFailure { get; set; }
+
         [JsonPropertyName("promptTokens")]
         public int PromptTokens { get; set; }
 
@@ -504,6 +508,15 @@ namespace LenSa.Core.Services.Api
         [JsonPropertyName("cachedTokens")]
         public int? CachedTokens { get; set; }
 
+    }
+
+    public class ChatToolLastFailure
+    {
+        [JsonPropertyName("toolName")]
+        public string? ToolName { get; set; }
+
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
     }
 
     // --- User DTOs ---
@@ -919,5 +932,10 @@ namespace LenSa.Core.Services.Api
         {
             ErrorCode = errorCode;
         }
+    }
+
+    public sealed class ChatTurnCanceledException : OperationCanceledException
+    {
+        public ChatTurnCanceledException() : base("The async chat turn was canceled by the server.") { }
     }
 }

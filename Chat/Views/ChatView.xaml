@@ -284,13 +284,24 @@
 
                     <!-- Пузырь ответа модели (смок T-000074: выделить фоном, как в мокапе):
                          markdown-контент + кнопки-иконки. Tool-раунды без текста — без пузыря. -->
-                    <Border Background="{DynamicResource AssistantBubbleBackground}"
-                            BorderBrush="{DynamicResource BorderColor}"
+                    <Border
                             BorderThickness="1"
                             CornerRadius="10,10,10,2"
                             Padding="13,10"
                             Margin="0,3,0,0"
                             Visibility="{Binding Content, Converter={StaticResource EmptyToVis}, ConverterParameter=invert}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="{DynamicResource AssistantBubbleBackground}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsError}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource ErrorBackground}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource ErrorColor}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
                         <StackPanel>
                             <!-- Content: markdown-рендер (T-000103) -->
                             <!-- CodeBlockCommand: кнопка «→ в песочницу» на код-блоках (T-000096).
@@ -307,6 +318,13 @@
                                          VerticalScrollBarVisibility="Disabled"
                                          HorizontalScrollBarVisibility="Disabled"
                                          PreviewMouseWheel="MessageBody_PreviewMouseWheel"/>
+
+                            <TextBlock Text="{Binding ServerDetail}"
+                                       Visibility="{Binding ServerDetail, Converter={StaticResource EmptyToVis}, ConverterParameter=invert}"
+                                       Foreground="{DynamicResource SecondaryForeground}"
+                                       FontSize="10"
+                                       TextWrapping="Wrap"
+                                       Margin="0,5,0,0"/>
 
                             <!-- Кнопки-иконки: Копировать (✓-фидбек) и Цитата -->
                             <StackPanel Orientation="Horizontal"

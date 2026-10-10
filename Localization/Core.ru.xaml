@@ -148,5 +148,10 @@
          может разойтись с настройкой сервера, поэтому цифру подставляет сервер. -->
     <sys:String x:Key="str_ErrorMessageTooLong">Сообщение длиннее лимита сервера — оно не отправлено. {0}</sys:String>
     <sys:String x:Key="str_ErrorRequestTooLarge">Запрос слишком большой для сервера. Если это чтение модуля — попросите AI взять его частями. {0}</sys:String>
+    <sys:String x:Key="str_ErrorAiRetryAdvice">Смените модель или упростите запрос.</sys:String>
+    <sys:String x:Key="str_ErrorTurnStillRunning">Предыдущий ход ещё выполняется.</sys:String>
+    <sys:String x:Key="str_Chat_RetryExhausted">Попытки исчерпаны: {0}/{1}.</sys:String>
+    <sys:String x:Key="str_Chat_LastToolFailure">Последний инструмент — {0}: {1}</sys:String>
+    <sys:String x:Key="str_Chat_RetryToolFailed">Инструмент не завершил ход.</sys:String>
     <sys:String x:Key="str_InputLimitHint">Длина сообщения. Сервер принимает не больше 64 000 символов — при превышении отправка блокируется, но текст остаётся на месте: решайте сами, что сократить.</sys:String>
 </ResourceDictionary>

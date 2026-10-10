@@ -1103,10 +1103,23 @@ namespace LenSa.Core.Chat.ViewModels
 
             if (retry.RetryExhausted)
             {
+                var failureMessage = !string.IsNullOrWhiteSpace(retry.LastFailure?.Message)
+                    ? retry.LastFailure!.Message!
+                    : retry.Content;
+                if (string.IsNullOrWhiteSpace(failureMessage))
+                    failureMessage = System.Windows.Application.Current?.TryFindResource("str_Chat_RetryToolFailed") as string
+                        ?? "The tool round did not complete.";
+
+                foreach (var toolCall in msg.ToolCalls)
+                {
+                    toolCall.Status = ToolCallItem.StatusFailed;
+                    toolCall.ResultMessage = failureMessage;
+                }
+
                 Messages.Add(new ChatMessage
                 {
-                    Role = MessageRoles.Debug,
-                    Content = $"Retry исчерпан: {retry.AttemptsUsed}/{retry.AttemptsMax}"
+                    Role = MessageRoles.Notice,
+                    Content = BuildRetryExhaustedSummary(retry)
                 });
                 return;
             }
@@ -1168,6 +1181,10 @@ namespace LenSa.Core.Chat.ViewModels
                 await HandleChatResponseAsync(response);
             }
             catch (OperationCanceledException) when (cts.IsCancellationRequested)
+            {
+                await OnChatInterruptedAsync();
+            }
+            catch (ChatTurnCanceledException)
             {
                 await OnChatInterruptedAsync();
             }
@@ -1302,35 +1319,76 @@ namespace LenSa.Core.Chat.ViewModels
         ///
         /// Возвращает null, если код не наш, — тогда решает наследник.
         /// </summary>
-        protected static string? MapCommonError(ApiException ex)
+        protected static string? MapCommonError(ApiException ex) =>
+            MapCommonErrorPresentation(ex)?.Message;
+
+        protected static CommonErrorPresentation? MapCommonErrorPresentation(
+            ApiException ex,
+            Func<string, string?>? resourceResolver = null)
         {
+            resourceResolver ??= key => System.Windows.Application.Current?.TryFindResource(key) as string;
+
+            if (ex.ErrorCode == "UPSTREAM_REJECTED")
+                return new CommonErrorPresentation(ex.Message, IsVerbatimServerText: true);
+
             var key = ex.ErrorCode switch
             {
                 // 400: message длиннее серверного лимита
                 "MESSAGE_TOO_LONG" => "str_ErrorMessageTooLong",
                 // 413: тело запроса больше транспортного капа (256 KB / 4 MB на tool-results)
                 "REQUEST_TOO_LARGE" => "str_ErrorRequestTooLarge",
+                "TOOL_LOOP_FINAL_FAILED" or "AI_OUTPUT_BUDGET_EXHAUSTED" or "AI_EMPTY_RESPONSE" => "str_ErrorAiRetryAdvice",
+                "TURN_STILL_RUNNING" => "str_ErrorTurnStillRunning",
                 _ => null
             };
             if (key is null) return null;
 
-            if (System.Windows.Application.Current?.TryFindResource(key) is not string template
-                || template.Length == 0)
+            if (resourceResolver(key) is not string template || template.Length == 0)
                 return null;
+
+            if (ex.ErrorCode is "TOOL_LOOP_FINAL_FAILED" or "AI_OUTPUT_BUDGET_EXHAUSTED" or "AI_EMPTY_RESPONSE")
+                return new CommonErrorPresentation(template, string.IsNullOrWhiteSpace(ex.Message) ? null : ex.Message);
 
             // Серверный текст несёт живые цифры (лимит и фактическую длину), а наш лимит —
             // всего лишь подсказка и может разойтись с настройкой сервера. Поэтому цифру
             // берём ИЗ ОТВЕТА, а локализованная строка её только обрамляет.
             try
             {
-                return string.Format(template, ex.Message);
+                return new CommonErrorPresentation(string.Format(template, ex.Message));
             }
             catch (FormatException)
             {
                 // Кривой плейсхолдер в переводе не должен ронять обработчик ошибки —
                 // это был бы отказ поверх отказа. Отдаём хотя бы текст сервера.
-                return $"{template} {ex.Message}";
+                return new CommonErrorPresentation($"{template} {ex.Message}");
             }
+        }
+
+        protected static string BuildRetryExhaustedSummary(
+            ChatToolRetryResponse retry,
+            Func<string, string?>? resourceResolver = null)
+        {
+            resourceResolver ??= key => System.Windows.Application.Current?.TryFindResource(key) as string;
+            var attemptsTemplate = resourceResolver("str_Chat_RetryExhausted") ?? "Retry attempts exhausted ({0}/{1}).";
+            var attempts = FormatLocalized(attemptsTemplate, retry.AttemptsUsed, retry.AttemptsMax);
+
+            var failureMessage = !string.IsNullOrWhiteSpace(retry.LastFailure?.Message)
+                ? retry.LastFailure!.Message!
+                : retry.Content;
+            if (string.IsNullOrWhiteSpace(failureMessage))
+                failureMessage = resourceResolver("str_Chat_RetryToolFailed") ?? "The tool round did not complete.";
+
+            var toolName = retry.LastFailure?.ToolName;
+            if (string.IsNullOrWhiteSpace(toolName)) return $"{attempts} {failureMessage}";
+
+            var failureTemplate = resourceResolver("str_Chat_LastToolFailure") ?? "Last failed tool: {0}. {1}";
+            return $"{attempts} {FormatLocalized(failureTemplate, toolName, failureMessage)}";
+        }
+
+        private static string FormatLocalized(string template, params object[] args)
+        {
+            try { return string.Format(template, args); }
+            catch (FormatException) { return $"{template} {string.Join(" ", args)}"; }
         }
 
         /// <summary>
@@ -1340,10 +1398,15 @@ namespace LenSa.Core.Chat.ViewModels
         /// </summary>
         protected virtual Task OnApiExceptionAsync(ApiException ex)
         {
+            var common = MapCommonErrorPresentation(ex);
             Messages.Add(new ChatMessage
             {
                 Role = MessageRoles.Assistant,
-                Content = $"⚠ {MapCommonError(ex) ?? $"{ex.ErrorCode}: {ex.Message}"}"
+                Content = common?.IsVerbatimServerText == true
+                    ? common.Message
+                    : $"⚠ {common?.Message ?? $"{ex.ErrorCode}: {ex.Message}"}",
+                ServerDetail = common?.ServerDetail,
+                IsError = true
             });
             return Task.CompletedTask;
         }

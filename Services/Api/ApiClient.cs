@@ -78,11 +78,19 @@ namespace LenSa.Core.Services.Api
         }
 
         public ApiClient(string baseUrl)
+            : this(baseUrl, new HttpClientHandler())
+        {
+        }
+
+        public ApiClient(string baseUrl, HttpMessageHandler handler)
         {
             _baseUrl = string.Empty;
             BaseUrl = baseUrl;
             // ANNOUNCE-002: server v0.25.0 has WriteTimeout=300s; client buffer above that
-            _http = new HttpClient { Timeout = TimeSpan.FromSeconds(330) };
+            _http = new HttpClient(handler ?? throw new ArgumentNullException(nameof(handler)), disposeHandler: true)
+            {
+                Timeout = TimeSpan.FromSeconds(330)
+            };
         }
 
         public async Task<bool> CheckHealthAsync()
@@ -261,6 +269,9 @@ namespace LenSa.Core.Services.Api
                             throw new ApiException(
                                 poll.ErrorCode ?? poll.ServiceInfo?.ErrorCode ?? "AI_REQUEST_FAILED",
                                 poll.ErrorMessage ?? poll.Status);
+
+                        case AsyncChatStatus.Canceled:
+                            throw new ChatTurnCanceledException();
 
                         default:
                             throw new ApiException("UNKNOWN_STATUS", $"Unexpected poll status '{poll.Status}'");

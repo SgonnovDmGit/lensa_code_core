@@ -32,6 +32,7 @@ namespace LenSa.Core.Chat.Models
     public class ChatMessage : ViewModelBase
     {
         private string _content = string.Empty;
+        private string? _serverDetail;
         private string _modelName = string.Empty;
         private string _providerName = string.Empty;
         private bool _isThinking;
@@ -50,6 +51,7 @@ namespace LenSa.Core.Chat.Models
         private int? _userMessageId;
         private bool _isStreaming;
         private bool _isInterrupted;
+        private bool _isError;
         private string? _checkpointTrigger;
         private int? _checkpointTokensBefore;
         private int? _checkpointWindowTokensAfterEstimate;
@@ -62,6 +64,19 @@ namespace LenSa.Core.Chat.Models
         {
             get => _content;
             set => SetProperty(ref _content, value);
+        }
+
+        /// <summary>Small server-provided detail shown below shared error advice.</summary>
+        public string? ServerDetail
+        {
+            get => _serverDetail;
+            set => SetProperty(ref _serverDetail, value);
+        }
+
+        public bool IsError
+        {
+            get => _isError;
+            set => SetProperty(ref _isError, value);
         }
 
         public string ProviderName

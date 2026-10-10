@@ -148,5 +148,10 @@
          Our constant may drift from the server setting, so the number comes from the server. -->
     <sys:String x:Key="str_ErrorMessageTooLong">The message is longer than the server limit and was not sent. {0}</sys:String>
     <sys:String x:Key="str_ErrorRequestTooLarge">The request is too large for the server. If this is a module read, ask the AI to take it in parts. {0}</sys:String>
+    <sys:String x:Key="str_ErrorAiRetryAdvice">Switch models or simplify the request.</sys:String>
+    <sys:String x:Key="str_ErrorTurnStillRunning">The previous turn is still running.</sys:String>
+    <sys:String x:Key="str_Chat_RetryExhausted">Tool attempts exhausted: {0}/{1}.</sys:String>
+    <sys:String x:Key="str_Chat_LastToolFailure">Last failed tool — {0}: {1}</sys:String>
+    <sys:String x:Key="str_Chat_RetryToolFailed">The tool did not complete the turn.</sys:String>
     <sys:String x:Key="str_InputLimitHint">Message length. The server accepts at most 64,000 characters — sending is blocked above that, but your text stays put: you decide what to cut.</sys:String>
 </ResourceDictionary>
