@@ -457,11 +457,83 @@
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SecondaryForeground}"/>
                     </StackPanel>
-                    <TextBlock Text="{Binding Content}"
-                               FontSize="11" TextWrapping="Wrap" Opacity="0.85"
-                               Foreground="{DynamicResource SecondaryForeground}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <TextBlock Text="{DynamicResource str_Chat_CheckpointAuto}"
+                                   Foreground="{DynamicResource SecondaryForeground}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CheckpointTrigger}" Value="auto">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBlock Text="{DynamicResource str_Chat_CheckpointManual}"
+                                   Foreground="{DynamicResource SecondaryForeground}">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CheckpointTrigger}" Value="manual">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <StackPanel Orientation="Horizontal" Margin="8,0,0,0"
+                                    Visibility="{Binding HasCheckpointReduction, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="{Binding CheckpointTokensBefore, StringFormat={}{0:N0}}"
+                                       Foreground="{DynamicResource SecondaryForeground}"/>
+                            <TextBlock Text=" → " Foreground="{DynamicResource SecondaryForeground}"/>
+                            <TextBlock Text="{Binding CheckpointTokensAfter, StringFormat={}{0:N0}}"
+                                       Foreground="{DynamicResource SecondaryForeground}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <ToggleButton IsChecked="{Binding IsSummaryExpanded, Mode=TwoWay}"
+                                  HorizontalAlignment="Left" Background="Transparent"
+                                  BorderThickness="0" Padding="0" Cursor="Hand">
+                        <StackPanel>
+                            <TextBlock Text="{DynamicResource str_Chat_ShowSummary}"
+                                       Foreground="{DynamicResource SecondaryForeground}"
+                                       Visibility="{Binding IsSummaryExpanded, Converter={StaticResource InvBoolToVis}}"/>
+                            <TextBlock Text="{DynamicResource str_Chat_HideSummary}"
+                                       Foreground="{DynamicResource SecondaryForeground}"
+                                       Visibility="{Binding IsSummaryExpanded, Converter={StaticResource BoolToVis}}"/>
+                        </StackPanel>
+                    </ToggleButton>
+                    <ScrollViewer MaxHeight="180" Margin="0,6,0,0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Visibility="{Binding IsSummaryExpanded, Converter={StaticResource BoolToVis}}">
+                        <TextBlock Text="{Binding Content}" FontSize="11" TextWrapping="Wrap" Opacity="0.85"
+                                   Foreground="{DynamicResource SecondaryForeground}"/>
+                    </ScrollViewer>
                 </StackPanel>
             </Border>
+        </DataTemplate>
+
+        <!-- ================= SERVICE NOTICE (T-000167 D7a) ================= -->
+        <DataTemplate x:Key="NoticeTemplate">
+            <Grid Margin="24,6,24,6">
+                <Border Background="{DynamicResource TertiaryBackground}" Padding="12,8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="ℹ" Margin="0,0,8,0" VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SecondaryForeground}"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Content}" TextWrapping="Wrap"
+                                   Foreground="{DynamicResource SecondaryForeground}"/>
+                    </Grid>
+                </Border>
+                <Rectangle Stroke="{DynamicResource BorderColor}" StrokeThickness="1"
+                           StrokeDashArray="2,2" IsHitTestVisible="False"/>
+            </Grid>
         </DataTemplate>
 
         <!-- ================= SELECTOR ================= -->
@@ -471,7 +543,8 @@
                                         ToolUseTemplate="{StaticResource ToolUseTemplate}"
                                         ToolResultTemplate="{StaticResource ToolResultTemplate}"
                                         DebugTemplate="{StaticResource DebugTemplate}"
-                                        CheckpointTemplate="{StaticResource CheckpointTemplate}"/>
+                                        CheckpointTemplate="{StaticResource CheckpointTemplate}"
+                                        NoticeTemplate="{StaticResource NoticeTemplate}"/>
     </UserControl.Resources>
 
     <!-- Композер вынесен в ChatInputBar (T-000074): ChatView = только лента -->
@@ -489,8 +562,14 @@
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="16,12,16,0">
-            <ItemsControl ItemsSource="{Binding Messages}"
-                          ItemTemplateSelector="{StaticResource MessageSelector}"/>
+            <StackPanel>
+                <Button Content="{DynamicResource str_Chat_ShowEarlier}"
+                        Command="{Binding ShowEarlierMessagesCommand}"
+                        HorizontalAlignment="Left" Margin="0,0,0,8"
+                        Visibility="{Binding HasOlderMessages, Converter={StaticResource BoolToVis}}"/>
+                <ItemsControl x:Name="MessageItems" ItemsSource="{Binding Messages}"
+                              ItemTemplateSelector="{StaticResource MessageSelector}"/>
+            </StackPanel>
         </ScrollViewer>
 
         <!-- Welcome-экран первого запуска (T-000074): виден пока нет сообщений -->

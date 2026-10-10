@@ -265,6 +265,7 @@ namespace LenSa.Core.Services.Api
         /// </summary>
         [JsonPropertyName("cachedTokens")]
         public int? CachedTokens { get; set; }
+
     }
 
     /// <summary>
@@ -495,6 +496,7 @@ namespace LenSa.Core.Services.Api
         /// <summary>Prompt-токены раунда из кэша (REQ-027). Присутствует ⟺ > 0.</summary>
         [JsonPropertyName("cachedTokens")]
         public int? CachedTokens { get; set; }
+
     }
 
     // --- User DTOs ---
@@ -815,6 +817,18 @@ namespace LenSa.Core.Services.Api
         /// <summary>Prompt-токены хода из кэша (REQ-027). Присутствует ⟺ > 0.</summary>
         [JsonPropertyName("cachedTokens")]
         public int? CachedTokens { get; set; }
+
+        [JsonPropertyName("checkpointTrigger")]
+        public string? CheckpointTrigger { get; set; }
+
+        [JsonPropertyName("tokensBefore")]
+        public int? TokensBefore { get; set; }
+
+        [JsonPropertyName("windowTokensAfterEstimate")]
+        public int? WindowTokensAfterEstimate { get; set; }
+
+        [JsonPropertyName("windowTokensAfterActual")]
+        public int? WindowTokensAfterActual { get; set; }
     }
 
     /// <summary>
@@ -831,6 +845,10 @@ namespace LenSa.Core.Services.Api
 
         [JsonPropertyName("messages")]
         public SessionMessageDto[] Messages { get; set; } = Array.Empty<SessionMessageDto>();
+
+        /// <summary>True when messages exist before this page; omitted by older servers.</summary>
+        [JsonPropertyName("hasOlder")]
+        public bool HasOlder { get; set; }
 
         /// <summary>
         /// Занятость контекста сессии на момент перезагрузки — **top-level**, а не в сообщениях

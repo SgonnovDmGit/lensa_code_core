@@ -16,6 +16,7 @@ namespace LenSa.Core.Chat.Views
         public DataTemplate? ToolResultTemplate { get; set; }
         public DataTemplate? DebugTemplate { get; set; }
         public DataTemplate? CheckpointTemplate { get; set; }
+        public DataTemplate? NoticeTemplate { get; set; }
 
         public override DataTemplate? SelectTemplate(object item, DependencyObject container)
         {
@@ -29,6 +30,7 @@ namespace LenSa.Core.Chat.Views
                 MessageRoles.ToolResult => ToolResultTemplate,
                 MessageRoles.Debug => DebugTemplate,
                 MessageRoles.Checkpoint => CheckpointTemplate,
+                MessageRoles.Notice => NoticeTemplate,
                 _ => AssistantTemplate
             };
         }

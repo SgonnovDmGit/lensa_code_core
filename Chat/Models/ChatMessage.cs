@@ -11,6 +11,7 @@ namespace LenSa.Core.Chat.Models
         public const string ToolUse = "tool_use";
         public const string ToolResult = "tool_result";
         public const string Debug = "debug";
+        public const string Notice = "notice";
 
         /// <summary>
         /// Синтетическая строка истории (ANNOUNCE-005): сервер сжал старый контекст в
@@ -49,6 +50,11 @@ namespace LenSa.Core.Chat.Models
         private int? _userMessageId;
         private bool _isStreaming;
         private bool _isInterrupted;
+        private string? _checkpointTrigger;
+        private int? _checkpointTokensBefore;
+        private int? _checkpointWindowTokensAfterEstimate;
+        private int? _checkpointWindowTokensAfterActual;
+        private bool _isSummaryExpanded;
 
         public string Role { get; set; } = string.Empty;
 
@@ -225,6 +231,61 @@ namespace LenSa.Core.Chat.Models
         public bool IsToolResult => Role == MessageRoles.ToolResult;
         public bool IsDebug => Role == MessageRoles.Debug;
         public bool IsCheckpoint => Role == MessageRoles.Checkpoint;
+        public bool IsNotice => Role == MessageRoles.Notice;
+
+        public string? CheckpointTrigger
+        {
+            get => _checkpointTrigger;
+            set => SetProperty(ref _checkpointTrigger, value);
+        }
+
+        public int? CheckpointTokensBefore
+        {
+            get => _checkpointTokensBefore;
+            set
+            {
+                if (SetProperty(ref _checkpointTokensBefore, value))
+                    OnPropertyChanged(nameof(HasCheckpointReduction));
+            }
+        }
+
+        public int? CheckpointWindowTokensAfterEstimate
+        {
+            get => _checkpointWindowTokensAfterEstimate;
+            set
+            {
+                if (SetProperty(ref _checkpointWindowTokensAfterEstimate, value))
+                {
+                    OnPropertyChanged(nameof(CheckpointTokensAfter));
+                    OnPropertyChanged(nameof(HasCheckpointReduction));
+                }
+            }
+        }
+
+        public int? CheckpointWindowTokensAfterActual
+        {
+            get => _checkpointWindowTokensAfterActual;
+            set
+            {
+                if (SetProperty(ref _checkpointWindowTokensAfterActual, value))
+                {
+                    OnPropertyChanged(nameof(CheckpointTokensAfter));
+                    OnPropertyChanged(nameof(HasCheckpointReduction));
+                }
+            }
+        }
+
+        public int? CheckpointTokensAfter =>
+            CheckpointWindowTokensAfterActual ?? CheckpointWindowTokensAfterEstimate;
+
+        public bool HasCheckpointReduction =>
+            CheckpointTokensBefore is int before && CheckpointTokensAfter is int after && after < before;
+
+        public bool IsSummaryExpanded
+        {
+            get => _isSummaryExpanded;
+            set => SetProperty(ref _isSummaryExpanded, value);
+        }
 
         public bool HasCodeChanges
         {
@@ -242,6 +303,7 @@ namespace LenSa.Core.Chat.Models
             }
         }
 
-        public bool CanQuote => !IsUser && !IsDebug && !IsThinking && !IsToolUse && !IsToolResult && !IsCheckpoint;
+        public bool CanQuote => !IsUser && !IsDebug && !IsThinking && !IsToolUse && !IsToolResult &&
+                                !IsCheckpoint && !IsNotice;
     }
 }

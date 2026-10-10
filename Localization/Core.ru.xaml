@@ -90,7 +90,12 @@
     <sys:String x:Key="str_Chat_ToSandboxHint">Положить фрагмент в песочницу — оттуда можно применить в окно конфигуратора</sys:String>
 
     <!-- Компактизация контекста (ANNOUNCE-005) -->
-    <sys:String x:Key="str_Chat_ContextCompacted">Контекст сжат — дальше модель помнит начало диалога по этой сводке</sys:String>
+    <sys:String x:Key="str_Chat_ContextCompacted">Контекст сжат</sys:String>
+    <sys:String x:Key="str_Chat_ShowEarlier">Показать раньше</sys:String>
+    <sys:String x:Key="str_Chat_CheckpointAuto">автоматически</sys:String>
+    <sys:String x:Key="str_Chat_CheckpointManual">вручную</sys:String>
+    <sys:String x:Key="str_Chat_ShowSummary">Показать сводку ▾</sys:String>
+    <sys:String x:Key="str_Chat_HideSummary">Скрыть сводку ▴</sys:String>
 
     <!-- Доска задач (T-000080..T-000082, REQ-021) -->
     <sys:String x:Key="str_TaskBoard_Title">Доска задач</sys:String>

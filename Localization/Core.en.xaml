@@ -91,7 +91,12 @@
     <sys:String x:Key="str_Chat_ToSandboxHint">Put this fragment into the sandbox — from there it can be applied to the configurator window</sys:String>
 
     <!-- Context compaction (ANNOUNCE-005) -->
-    <sys:String x:Key="str_Chat_ContextCompacted">Context compacted — earlier history is summarized below</sys:String>
+    <sys:String x:Key="str_Chat_ContextCompacted">Context compacted</sys:String>
+    <sys:String x:Key="str_Chat_ShowEarlier">Show earlier</sys:String>
+    <sys:String x:Key="str_Chat_CheckpointAuto">automatic</sys:String>
+    <sys:String x:Key="str_Chat_CheckpointManual">manually</sys:String>
+    <sys:String x:Key="str_Chat_ShowSummary">Show summary ▾</sys:String>
+    <sys:String x:Key="str_Chat_HideSummary">Hide summary ▴</sys:String>
 
     <sys:String x:Key="str_TaskBoard_Title">Task board</sys:String>
     <sys:String x:Key="str_TaskBoard_Pending">pending</sys:String>

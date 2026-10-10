@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,6 +12,11 @@ namespace LenSa.Core.Chat.Views
 {
     public partial class ChatView : UserControl
     {
+        private FrameworkElement? _prependAnchor;
+        private double _prependAnchorY;
+        private double _prependExtentHeight;
+        private bool _prependRestoreQueued;
+
         public ChatView()
         {
             InitializeComponent();
@@ -27,14 +33,84 @@ namespace LenSa.Core.Chat.Views
 
         private void OnMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            // Автопрокрутка к последнему сообщению
-            if (e.Action == NotifyCollectionChangedAction.Add)
+            if (e.Action != NotifyCollectionChangedAction.Add) return;
+
+            if (e.NewStartingIndex == 0)
             {
-                Dispatcher.BeginInvoke(new System.Action(() => ThreadScroll.ScrollToEnd()),
-                    System.Windows.Threading.DispatcherPriority.Background);
+                PreserveViewportAfterPrepend();
+                return;
             }
+
+            // Append scrolls to the latest message; prepend keeps the visible anchor in place.
+            Dispatcher.BeginInvoke(new System.Action(() => ThreadScroll.ScrollToEnd()),
+                System.Windows.Threading.DispatcherPriority.Background);
         }
 
+        private void PreserveViewportAfterPrepend()
+        {
+            if (_prependRestoreQueued) return;
+
+            _prependRestoreQueued = true;
+            _prependExtentHeight = ThreadScroll.ExtentHeight;
+            _prependAnchor = FindFirstVisibleMessage(out _prependAnchorY);
+            Dispatcher.BeginInvoke(new System.Action(RestorePrependViewport),
+                System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+
+        private FrameworkElement? FindFirstVisibleMessage(out double y)
+        {
+            y = 0;
+            for (var index = 0; index < MessageItems.Items.Count; index++)
+            {
+                if (MessageItems.ItemContainerGenerator.ContainerFromIndex(index) is not FrameworkElement item ||
+                    !item.IsVisible)
+                    continue;
+
+                try
+                {
+                    var position = item.TransformToAncestor(ThreadScroll).Transform(new Point(0, 0));
+                    if (position.Y + item.ActualHeight <= 0 || position.Y >= ThreadScroll.ViewportHeight)
+                        continue;
+
+                    y = position.Y;
+                    return item;
+                }
+                catch (InvalidOperationException)
+                {
+                    // Layout may not have attached this container yet; extent delta is the fallback.
+                }
+            }
+
+            return null;
+        }
+
+        private void RestorePrependViewport()
+        {
+            ThreadScroll.UpdateLayout();
+            if (_prependAnchor is { IsLoaded: true } anchor)
+            {
+                try
+                {
+                    var newY = anchor.TransformToAncestor(ThreadScroll).Transform(new Point(0, 0)).Y;
+                    ThreadScroll.ScrollToVerticalOffset(ThreadScroll.VerticalOffset + newY - _prependAnchorY);
+                }
+                catch (InvalidOperationException)
+                {
+                    RestoreByExtentDelta();
+                }
+            }
+            else
+            {
+                RestoreByExtentDelta();
+            }
+
+            _prependAnchor = null;
+            _prependRestoreQueued = false;
+        }
+
+        private void RestoreByExtentDelta() =>
+            ThreadScroll.ScrollToVerticalOffset(
+                ThreadScroll.VerticalOffset + ThreadScroll.ExtentHeight - _prependExtentHeight);
         // --- Кнопки-иконки под сообщением ассистента (T-000074) --------------
 
         private void CopyMessage_Click(object sender, RoutedEventArgs e)

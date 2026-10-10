@@ -28,6 +28,8 @@ namespace LenSa.Core.Chat.ViewModels
         private string _inputText = string.Empty;
         private string _sessionId = string.Empty;
         private bool _isBusy;
+        private bool _hasOlderMessages;
+        private bool _isLoadingOlderMessages;
 
         // CTS активного SendMessageAsync — заменяется на новый в каждом заходе,
         // используется InterruptCommand для отмены submit+poll (ANNOUNCE-007).
@@ -105,6 +107,44 @@ namespace LenSa.Core.Chat.ViewModels
 
         public ObservableCollection<ChatMessage> Messages { get; } = new();
 
+        public bool HasOlderMessages
+        {
+            get => _hasOlderMessages;
+            private set
+            {
+                if (!SetProperty(ref _hasOlderMessages, value)) return;
+                System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
+        public bool IsLoadingOlderMessages
+        {
+            get => _isLoadingOlderMessages;
+            private set
+            {
+                if (!SetProperty(ref _isLoadingOlderMessages, value)) return;
+                System.Windows.Input.CommandManager.InvalidateRequerySuggested();
+            }
+        }
+
+        protected void SetHasOlderMessages(bool value) => HasOlderMessages = value;
+
+        private async Task LoadEarlierHistoryPageGuardedAsync()
+        {
+            if (!HasOlderMessages || IsLoadingOlderMessages || IsBusy) return;
+            IsLoadingOlderMessages = true;
+            try
+            {
+                await LoadEarlierHistoryPageAsync();
+            }
+            finally
+            {
+                IsLoadingOlderMessages = false;
+            }
+        }
+
+        protected virtual Task LoadEarlierHistoryPageAsync() => Task.CompletedTask;
+
         public string InputText
         {
             get => _inputText;
@@ -173,6 +213,7 @@ namespace LenSa.Core.Chat.ViewModels
 
         /// <summary>Новый диалог, доска переезжает (T-000159). Неактивна, когда доска пуста.</summary>
         public ICommand NewChatWithBoardCommand { get; }
+        public ICommand ShowEarlierMessagesCommand { get; }
         public ICommand InterruptCommand { get; }
 
         /// <summary>Ручное сжатие контекста диалога (T-000133).</summary>
@@ -199,10 +240,14 @@ namespace LenSa.Core.Chat.ViewModels
                 () => _ = CompactContextAsync(),
                 () => !string.IsNullOrEmpty(SessionId) && !IsBusy);
 
-            NewChatCommand = new RelayCommand(NewChat, () => !IsBusy);
+            ShowEarlierMessagesCommand = new RelayCommand(
+                () => _ = LoadEarlierHistoryPageGuardedAsync(),
+                () => HasOlderMessages && !IsLoadingOlderMessages && !IsBusy);
+
+            NewChatCommand = new RelayCommand(NewChat, () => !IsBusy && !IsLoadingOlderMessages);
 
             NewChatWithBoardCommand = new RelayCommand(
-                NewChatWithBoard, () => !IsBusy && TaskBoard.Count > 0);
+                NewChatWithBoard, () => !IsBusy && !IsLoadingOlderMessages && TaskBoard.Count > 0);
 
             InterruptCommand = new RelayCommand(
                 Interrupt,
@@ -777,7 +822,7 @@ namespace LenSa.Core.Chat.ViewModels
                 // Показываем спокойной строкой, а не красным ⚠ через OnApiExceptionAsync.
                 Messages.Add(new ChatMessage
                 {
-                    Role = Models.MessageRoles.Checkpoint,
+                    Role = Models.MessageRoles.Notice,
                     Content = FindString("str_CompactBelowFloor",
                         "Сжимать пока нечего — контекст ещё не набрался.")
                 });
@@ -1318,6 +1363,7 @@ namespace LenSa.Core.Chat.ViewModels
         protected virtual void NewChat()
         {
             Messages.Clear();
+            SetHasOlderMessages(false);
             SessionId = string.Empty;
             _boardCarriedOver = false;
             ClearTaskBoard();
@@ -1336,6 +1382,7 @@ namespace LenSa.Core.Chat.ViewModels
         {
             var carried = TaskBoard.Count > 0;
             Messages.Clear();
+            SetHasOlderMessages(false);
             SessionId = string.Empty;
             _boardCarriedOver = carried;
             // Доску НЕ чистим: она уляжется под новый sessionId, как только сервер его выдаст
