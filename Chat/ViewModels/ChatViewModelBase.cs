@@ -944,6 +944,14 @@ namespace LenSa.Core.Chat.ViewModels
                 {
                     try
                     {
+                        try
+                        {
+                            ApiClient.DiagLog?.Invoke(SafeToolInputLogFormatter.Format(toolUse.Name, toolUse.Input));
+                        }
+                        catch
+                        {
+                            // Diagnostics are best-effort and must not affect tool execution.
+                        }
                         result = await handler(toolUse);
                         result.ToolUseId = toolUse.Id;
                         result.Name ??= toolUse.Name;
