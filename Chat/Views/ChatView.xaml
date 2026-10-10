@@ -495,7 +495,40 @@
                     </StackPanel>
                     <ToggleButton IsChecked="{Binding IsSummaryExpanded, Mode=TwoWay}"
                                   HorizontalAlignment="Left" Background="Transparent"
-                                  BorderThickness="0" Padding="0" Cursor="Hand">
+                                  BorderThickness="0" Padding="0" Cursor="Hand"
+                                  Foreground="{DynamicResource SecondaryForeground}">
+                        <ToggleButton.Style>
+                            <Style TargetType="ToggleButton">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ToggleButton">
+                                            <Border x:Name="Cue" Background="Transparent"
+                                                    BorderBrush="{DynamicResource AccentColor}"
+                                                    BorderThickness="0">
+                                                <ContentPresenter Content="{TemplateBinding Content}"
+                                                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="Cue" Property="BorderThickness" Value="0,0,0,1"/>
+                                                </Trigger>
+                                                <Trigger Property="IsKeyboardFocused" Value="True">
+                                                    <Setter TargetName="Cue" Property="BorderThickness" Value="0,0,0,1"/>
+                                                </Trigger>
+                                                <Trigger Property="IsPressed" Value="True">
+                                                    <Setter TargetName="Cue" Property="Opacity" Value="0.7"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ToggleButton.Style>
                         <StackPanel>
                             <TextBlock Text="{DynamicResource str_Chat_ShowSummary}"
                                        Foreground="{DynamicResource SecondaryForeground}"
