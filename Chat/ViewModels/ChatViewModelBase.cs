@@ -807,13 +807,15 @@ namespace LenSa.Core.Chat.ViewModels
             {
                 var r = await Api.CompactSessionAsync(SessionId);
 
-                var text = r.TokensBefore.HasValue && r.TokensAfterEstimate.HasValue
-                    ? string.Format(
-                        FindString("str_ContextCompactedFmt", "Контекст сжат: {0:N0} → ~{1:N0} токенов"),
-                        r.TokensBefore.Value, r.TokensAfterEstimate.Value)
-                    : FindString("str_ContextCompacted", "Контекст сжат");
-
-                Messages.Add(new ChatMessage { Role = Models.MessageRoles.Checkpoint, Content = text });
+                var after = r.ContextFill?.WindowTokens ?? r.WindowTokensAfterEstimate ?? r.TokensAfterEstimate;
+                Messages.Add(new ChatMessage
+                {
+                    Role = Models.MessageRoles.Checkpoint,
+                    Content = r.Summary,
+                    CheckpointTrigger = "manual",
+                    CheckpointTokensBefore = r.TokensBefore,
+                    CheckpointWindowTokensAfterEstimate = after
+                });
                 OnContextCompacted(r);
             }
             catch (ApiException ex) when (ex.ErrorCode == "COMPACTION_BELOW_FLOOR")

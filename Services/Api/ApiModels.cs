@@ -284,7 +284,13 @@ namespace LenSa.Core.Services.Api
 
         /// <summary>Полный отправленный контекст финального AI-вызова: промпт + тулы + история.</summary>
         [JsonPropertyName("lastPromptTokens")]
-        public int LastPromptTokens { get; set; }
+        public int? LastPromptTokens { get; set; }
+
+        [JsonPropertyName("windowTokens")]
+        public int? WindowTokens { get; set; }
+
+        [JsonPropertyName("windowTokensSource")]
+        public string? WindowTokensSource { get; set; }
 
         /// <summary>Окно модели из каталога. Может отсутствовать — каталогу оно неизвестно.</summary>
         [JsonPropertyName("contextWindow")]
@@ -311,8 +317,9 @@ namespace LenSa.Core.Services.Api
                 var limit = CompactionThresholdTokens is > 0
                     ? CompactionThresholdTokens.Value
                     : ContextWindow ?? 0;
-                if (limit <= 0 || LastPromptTokens <= 0) return 0;
-                var f = (double)LastPromptTokens / limit;
+                var numerator = WindowTokens ?? LastPromptTokens ?? 0;
+                if (limit <= 0 || numerator <= 0) return 0;
+                var f = (double)numerator / limit;
                 return f > 1 ? 1 : f;
             }
         }
@@ -887,9 +894,18 @@ namespace LenSa.Core.Services.Api
         [JsonPropertyName("tokensBefore")]
         public int? TokensBefore { get; set; }
 
-        /// <summary>ОЦЕНКА занятости после сжатия — честный замер придёт на следующем ходу.</summary>
+        /// <summary>Deprecated alias for summary-plus-remainder; this value is not window occupancy.</summary>
         [JsonPropertyName("tokensAfterEstimate")]
         public int? TokensAfterEstimate { get; set; }
+
+        [JsonPropertyName("contextFill")]
+        public ContextFillDto? ContextFill { get; set; }
+
+        [JsonPropertyName("summaryPlusRemainderTokens")]
+        public int? SummaryPlusRemainderTokens { get; set; }
+
+        [JsonPropertyName("windowTokensAfterEstimate")]
+        public int? WindowTokensAfterEstimate { get; set; }
     }
 
     public class ApiException : Exception

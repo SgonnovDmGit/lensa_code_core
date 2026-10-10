@@ -322,7 +322,14 @@
                                          BorderBrush="{DynamicResource PopupBorder}"
                                          Foreground="{DynamicResource PrimaryForeground}">
                                     <StackPanel MinWidth="170" Margin="4">
-                                        <DockPanel Margin="0,2"><TextBlock Text="{DynamicResource str_CtxTooltipUsed}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding ActiveChat.ContextTokens, StringFormat={}{0:N0}}" FontSize="12" Margin="12,0,0,0"/></DockPanel>
+                                        <DockPanel Margin="0,2">
+                                            <TextBlock Text="{DynamicResource str_CtxTooltipUsed}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/>
+                                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal"
+                                                        HorizontalAlignment="Right" Margin="12,0,0,0">
+                                                <TextBlock Text="≈" FontSize="12" Visibility="{Binding ActiveChat.IsContextFillEstimated, Converter={StaticResource BoolToVis}}"/>
+                                                <TextBlock Text="{Binding ActiveChat.ContextTokens, StringFormat={}{0:N0}}" FontSize="12"/>
+                                            </StackPanel>
+                                        </DockPanel>
                                         <!-- Предел — это ПОРОГ СЖАТИЯ, а не размер окна модели: сервер режет
                                              контекст раньше, чем окно кончится, и пользователю важна та точка,
                                              где он реально начнёт резать. Строка от contextLength показывала «—»:
