@@ -836,6 +836,9 @@ namespace LenSa.Core.Services.Api
 
         [JsonPropertyName("windowTokensAfterActual")]
         public int? WindowTokensAfterActual { get; set; }
+
+        [JsonPropertyName("checkpointCoversThroughMessageId")]
+        public int? CheckpointCoversThroughMessageId { get; set; }
     }
 
     /// <summary>
