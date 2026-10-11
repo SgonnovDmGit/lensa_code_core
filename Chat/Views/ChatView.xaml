@@ -319,12 +319,13 @@
                                          HorizontalScrollBarVisibility="Disabled"
                                          PreviewMouseWheel="MessageBody_PreviewMouseWheel"/>
 
-                            <TextBlock Text="{Binding ServerDetail}"
-                                       Visibility="{Binding ServerDetail, Converter={StaticResource EmptyToVis}, ConverterParameter=invert}"
+                            <TextBlock Visibility="{Binding ServerDetail, Converter={StaticResource EmptyToVis}, ConverterParameter=invert}"
                                        Foreground="{DynamicResource SecondaryForeground}"
                                        FontSize="10"
                                        TextWrapping="Wrap"
-                                       Margin="0,5,0,0"/>
+                                       Margin="0,5,0,0">
+                                <Run Text="{DynamicResource str_Chat_ServerPrefix}"/><Run Text="{Binding ServerDetail}"/>
+                            </TextBlock>
 
                             <!-- Кнопки-иконки: Копировать (✓-фидбек) и Цитата -->
                             <StackPanel Orientation="Horizontal"
@@ -559,7 +560,8 @@
                     <ScrollViewer MaxHeight="180" Margin="0,6,0,0"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled"
-                                  Visibility="{Binding IsSummaryExpanded, Converter={StaticResource BoolToVis}}">
+                                  Visibility="{Binding IsSummaryExpanded, Converter={StaticResource BoolToVis}}"
+                                  PreviewMouseWheel="Summary_PreviewMouseWheel">
                         <TextBlock Text="{Binding Content}" FontSize="11" TextWrapping="Wrap" Opacity="0.85"
                                    Foreground="{DynamicResource SecondaryForeground}"/>
                     </ScrollViewer>

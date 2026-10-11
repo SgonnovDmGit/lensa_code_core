@@ -151,7 +151,8 @@
     <sys:String x:Key="str_ErrorMessageTooLong">Сообщение длиннее лимита сервера — оно не отправлено. {0}</sys:String>
     <sys:String x:Key="str_ErrorRequestTooLarge">Запрос слишком большой для сервера. Если это чтение модуля — попросите AI взять его частями. {0}</sys:String>
     <sys:String x:Key="str_ErrorAiRetryAdvice">Смените модель или упростите запрос.</sys:String>
-    <sys:String x:Key="str_ErrorTurnStillRunning">Предыдущий ход ещё выполняется.</sys:String>
+    <sys:String x:Key="str_ErrorTurnStillRunning">Предыдущий ход ещё идёт.</sys:String>
+    <sys:String x:Key="str_Chat_ServerPrefix" xml:space="preserve">Сервер: </sys:String>
     <sys:String x:Key="str_Chat_RetryExhausted">Попытки исчерпаны: {0}/{1}.</sys:String>
     <sys:String x:Key="str_Chat_LastToolFailure">Последний инструмент — {0}: {1}</sys:String>
     <sys:String x:Key="str_Chat_RetryToolFailed">Инструмент не завершил ход.</sys:String>

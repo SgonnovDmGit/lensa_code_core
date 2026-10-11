@@ -110,6 +110,7 @@ namespace LenSa.Core.Services.Api
         public async Task<ModelDto[]> GetModelsAsync()
         {
             // The canonical catalog route has no provider segment; the server filters availability.
+            Diag("models", "GET /v1/api/models");
             using var request = CreateRequest(HttpMethod.Get, "/v1/api/models");
             var result = await SendAsync<ModelsResponse>(request);
             return result.Models;

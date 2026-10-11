@@ -35,7 +35,10 @@ namespace LenSa.Core.Chat.Views
         {
             if (e.Action != NotifyCollectionChangedAction.Add) return;
 
-            if (e.NewStartingIndex == 0)
+            var addedCount = e.NewItems?.Count ?? 0;
+            var hadMessagesBeforeAdd = sender is System.Collections.ICollection messages &&
+                                       messages.Count > addedCount;
+            if (e.NewStartingIndex == 0 && hadMessagesBeforeAdd)
             {
                 PreserveViewportAfterPrepend();
                 return;
@@ -173,6 +176,22 @@ namespace LenSa.Core.Chat.Views
         // RichTextBox сообщений глотает колесо мыши даже без своих скроллбаров —
         // пробрасываем событие родительскому ScrollViewer треда.
         private void MessageBody_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            ForwardMouseWheelToThread(sender, e);
+        }
+
+        private void Summary_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (e.Handled || sender is not ScrollViewer summary) return;
+
+            var canScrollInside = e.Delta > 0
+                ? summary.VerticalOffset > 0
+                : summary.VerticalOffset < summary.ScrollableHeight;
+            if (!canScrollInside)
+                ForwardMouseWheelToThread(sender, e);
+        }
+
+        private void ForwardMouseWheelToThread(object sender, MouseWheelEventArgs e)
         {
             if (e.Handled) return;
             e.Handled = true;
