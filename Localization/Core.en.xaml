@@ -140,6 +140,11 @@
 
     <!-- Context compaction (T-000133) -->
     <sys:String x:Key="str_CompactContext">Compact context</sys:String>
+    <sys:String x:Key="str_CompactRingHint">Click to compact now — this is a billed AI call</sys:String>
+    <sys:String x:Key="str_CompactBusy">A turn is in progress — compact after the reply</sys:String>
+    <sys:String x:Key="str_CompactNotConfigured">Context compaction is not configured</sys:String>
+    <sys:String x:Key="str_CompactDisabled">Context compaction is disabled for this product</sys:String>
+    <sys:String x:Key="str_CompactUnavailable">Context compaction is currently unavailable</sys:String>
     <sys:String x:Key="str_CompactContextHint">Fold the older part of the dialog into a summary without waiting for the automatic trigger. Messages stay where they are. This is a billed AI call.</sys:String>
     <sys:String x:Key="str_ContextCompactedFmt">Context compacted: {0:N0} → ~{1:N0} tokens</sys:String>
     <sys:String x:Key="str_ContextCompacted">Context compacted</sys:String>

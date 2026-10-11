@@ -259,6 +259,9 @@ namespace LenSa.Core.Services.Api
         [JsonPropertyName("contextFill")]
         public ContextFillDto? ContextFill { get; set; }
 
+        [JsonPropertyName("manualCompaction")]
+        public ManualCompactionDto? ManualCompaction { get; set; }
+
         /// <summary>
         /// Prompt-токены хода, прочитанные из кэша (REQ-027, сервер v0.80.0). ⊆ promptTokens.
         /// omitempty и присутствует ⟺ > 0: у провайдера с непрозрачным маршрутом «ноль» и
@@ -327,6 +330,22 @@ namespace LenSa.Core.Services.Api
 
         /// <summary>Есть что рисовать: известен и расход, и предел.</summary>
         public bool HasData => Fill > 0;
+    }
+
+    /// <summary>Server snapshot of whether manual compaction is currently allowed (REQ-085).</summary>
+    public class ManualCompactionDto
+    {
+        [JsonPropertyName("canCompact")]
+        public bool CanCompact { get; set; }
+
+        [JsonPropertyName("reasonCode")]
+        public string? ReasonCode { get; set; }
+
+        [JsonPropertyName("projectedTokens")]
+        public int? ProjectedTokens { get; set; }
+
+        [JsonPropertyName("floorTokens")]
+        public int? FloorTokens { get; set; }
     }
 
     public class CodeChangeDto
@@ -503,6 +522,9 @@ namespace LenSa.Core.Services.Api
         /// <summary>Занятость контекста после этого раунда (REQ-028). Ход после тула — тот же ход.</summary>
         [JsonPropertyName("contextFill")]
         public ContextFillDto? ContextFill { get; set; }
+
+        [JsonPropertyName("manualCompaction")]
+        public ManualCompactionDto? ManualCompaction { get; set; }
 
         /// <summary>Prompt-токены раунда из кэша (REQ-027). Присутствует ⟺ > 0.</summary>
         [JsonPropertyName("cachedTokens")]
@@ -881,6 +903,9 @@ namespace LenSa.Core.Services.Api
         /// </summary>
         [JsonPropertyName("contextFill")]
         public ContextFillDto? ContextFill { get; set; }
+
+        [JsonPropertyName("manualCompaction")]
+        public ManualCompactionDto? ManualCompaction { get; set; }
     }
 
     /// <summary>
@@ -916,6 +941,9 @@ namespace LenSa.Core.Services.Api
 
         [JsonPropertyName("contextFill")]
         public ContextFillDto? ContextFill { get; set; }
+
+        [JsonPropertyName("manualCompaction")]
+        public ManualCompactionDto? ManualCompaction { get; set; }
 
         [JsonPropertyName("summaryPlusRemainderTokens")]
         public int? SummaryPlusRemainderTokens { get; set; }

@@ -200,6 +200,7 @@ namespace LenSa.Core.Chat.ViewModels
             {
                 var previous = _sessionId;
                 if (!SetProperty(ref _sessionId, value)) return;
+                System.Windows.Input.CommandManager.InvalidateRequerySuggested();
 
                 // Доску завели до первого сообщения (сессии ещё не было) — сервер выдал id,
                 // переносим черновик под него, иначе он потерялся бы при перезапуске.
@@ -224,6 +225,12 @@ namespace LenSa.Core.Chat.ViewModels
         /// <summary>Ручное сжатие контекста диалога (T-000133).</summary>
         public ICommand CompactContextCommand { get; }
 
+        /// <summary>Product-specific data gate; consumers without a context ring keep the legacy behavior.</summary>
+        protected virtual bool CanCompactContext => true;
+
+        private bool CanExecuteCompactContext =>
+            !string.IsNullOrEmpty(SessionId) && !IsBusy && CanCompactContext;
+
         /// <summary>
         /// «→ в песочницу» на код-блоке ответа (T-000096). Базовый чат песочницы не знает —
         /// продукт переопределяет. null (Universal) → кнопки на блоках не рисуются.
@@ -243,7 +250,7 @@ namespace LenSa.Core.Chat.ViewModels
             // T-000133: сжать контекст руками, не дожидаясь автотриггера у самого потолка.
             CompactContextCommand = new RelayCommand(
                 () => _ = CompactContextAsync(),
-                () => !string.IsNullOrEmpty(SessionId) && !IsBusy);
+                () => CanExecuteCompactContext);
 
             ShowEarlierMessagesCommand = new RelayCommand(
                 () => _ = LoadEarlierHistoryPageGuardedAsync(),
@@ -805,7 +812,7 @@ namespace LenSa.Core.Chat.ViewModels
         /// </summary>
         private async Task CompactContextAsync()
         {
-            if (string.IsNullOrEmpty(SessionId) || IsBusy) return;
+            if (!CanExecuteCompactContext) return;
 
             IsBusy = true;
             try

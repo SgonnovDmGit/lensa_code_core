@@ -15,6 +15,7 @@
     <SolidColorBrush x:Key="ButtonBackground" Color="#1D2733"/>
     <SolidColorBrush x:Key="ButtonForeground" Color="#E6EDF3"/>
     <SolidColorBrush x:Key="ButtonHoverBackground" Color="#26323F"/>
+    <SolidColorBrush x:Key="HoverBackground" Color="#26323F"/>
     <SolidColorBrush x:Key="ButtonPressedBackground" Color="#33404D"/>
     <SolidColorBrush x:Key="TextBoxBackground" Color="#161E27"/>
     <SolidColorBrush x:Key="TextBoxBorder" Color="#33404D"/>

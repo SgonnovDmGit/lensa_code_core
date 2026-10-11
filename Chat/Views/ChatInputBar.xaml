@@ -289,9 +289,24 @@
                         </Popup>
 
                         <!-- === Кольцо контекста: стоит вплотную к модели === -->
-                        <Grid Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0"
-                              VerticalAlignment="Center" Background="Transparent"
-                              ToolTipService.InitialShowDelay="150">
+                        <Button x:Name="ContextRing" Grid.Column="1" Width="24" Height="24" Margin="8,0,0,0"
+                                VerticalAlignment="Center" MinWidth="0" MinHeight="0" Padding="0" Cursor="Hand"
+                                Command="{Binding ActiveChat.CompactContextCommand}"
+                                AutomationProperties.Name="{DynamicResource str_CompactContext}"
+                                ToolTipService.ShowOnDisabled="True" ToolTipService.InitialShowDelay="150">
+                            <Button.Template>
+                                <ControlTemplate TargetType="Button">
+                                    <Border x:Name="RingHover" Background="Transparent" CornerRadius="12">
+                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="RingHover" Property="Background" Value="{DynamicResource HoverBackground}"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Button.Template>
+                            <Grid Width="24" Height="24">
                             <!-- Фон и дуга — ОДНО кольцо двумя примитивами (T-000165).
                                  23.2 = 2*R + StrokeThickness при R=10 из PercentToArcConverter;
                                  центр обоих = 12. Меняешь одно — меняй и конвертер. -->
@@ -317,7 +332,8 @@
                                     </Style>
                                 </Path.Style>
                             </Path>
-                            <Grid.ToolTip>
+                            </Grid>
+                            <Button.ToolTip>
                                 <ToolTip Background="{DynamicResource PopupBackground}"
                                          BorderBrush="{DynamicResource PopupBorder}"
                                          Foreground="{DynamicResource PrimaryForeground}">
@@ -355,48 +371,20 @@
                                                        Text="{Binding ActiveChat.ContextFillPercent, StringFormat={}{0:F0}%}"
                                                        FontWeight="SemiBold" Margin="12,0,0,0"/>
                                         </DockPanel>
+                                        <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0"
+                                                Margin="0,7,0,0" Padding="0,6,0,0">
+                                            <StackPanel MaxWidth="250">
+                                                <TextBlock Text="{DynamicResource str_CompactRingHint}" FontSize="12"
+                                                           TextWrapping="Wrap" Foreground="{DynamicResource SecondaryForeground}"/>
+                                                <TextBlock Text="{Binding ActiveChat.CompactUnavailableReason}" FontSize="11"
+                                                           TextWrapping="Wrap" FontStyle="Italic" Margin="0,5,0,0"
+                                                           Foreground="{DynamicResource SecondaryForeground}"
+                                                           Visibility="{Binding ActiveChat.CompactUnavailableReason, Converter={StaticResource EmptyToVis}}"/>
+                                            </StackPanel>
+                                        </Border>
                                     </StackPanel>
                                 </ToolTip>
-                            </Grid.ToolTip>
-                        </Grid>
-
-                        <!-- === «Сжать контекст» (T-000133) ===
-                             Стоит вплотную к кольцу: оно и есть повод нажать. Появляется, только
-                             когда контекст вообще измерен — иначе кнопка звала бы на платный вызов
-                             в пустом диалоге. FallbackValue=Collapsed: у продукта без кольца
-                             (биндинг не разрешится) кнопки просто не будет. -->
-                        <Button Grid.Column="2" Command="{Binding ActiveChat.CompactContextCommand}"
-                                HorizontalAlignment="Left" VerticalAlignment="Center"
-                                Margin="4,0,0,0" Padding="6,3" Cursor="Hand"
-                                ToolTip="{DynamicResource str_CompactContextHint}"
-                                ToolTipService.InitialShowDelay="150"
-                                Visibility="{Binding ActiveChat.HasContextFill,
-                                             Converter={StaticResource BoolToVis}, FallbackValue=Collapsed}">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="bd" Background="Transparent" CornerRadius="6"
-                                            Padding="{TemplateBinding Padding}">
-                                        <ContentPresenter/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="bd" Property="Background"
-                                                    Value="{DynamicResource SecondaryBackground}"/>
-                                        </Trigger>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter Property="Opacity" Value="0.35"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <!-- Вектор, а не символ. Было «⊟» (U+229F): этого глифа в системном
-                                 шрифте нет, и вместо кнопки рисовался квадратик-заглушка (смок
-                                 13.07). Вылезло только сейчас — кнопка показывается при живом
-                                 кольце, а кольцо до T-000155 было мёртвым, и её никто не видел.
-                                 Две стрелки к черте — «сжать к середине» (T-000161). -->
-                            <Path Width="13" Height="13" Stretch="Uniform"
-                                  Fill="{DynamicResource SecondaryForeground}"
-                                  Data="M4,11H20V13H4V11M12,10L8,6H11V2H13V6H16L12,10M12,14L16,18H13V22H11V18H8L12,14Z"/>
+                            </Button.ToolTip>
                         </Button>
 
                         <!-- === Счётчик длины сообщения (T-000163, ANNOUNCE-002) ===

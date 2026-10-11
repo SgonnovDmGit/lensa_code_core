@@ -275,16 +275,15 @@ namespace LenSa.Core.Helpers
     }
 
     /// <summary>
-    /// Зона заполнения контекста: &lt;50 → "ok", 50–80 → "warn", &gt;80 → "crit".
-    /// Для DataTrigger'ов цвета кольца и строки «Заполнение» (мята → янтарь → красный).
-    /// Пороги опущены по смок-фидбэку 06.07: краснеть раньше, чем упрёшься.
+    /// Зона заполнения контекста: &lt;70 → "ok", ≥70 → "warn", ≥90 → "crit".
+    /// Одно правило для кольца, тултипа и полосы карточки метрики (D26a/D51).
     /// </summary>
     public class ContextZoneConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var pct = value switch { double d => d, int i => i, _ => 0.0 };
-            return pct > 80 ? "crit" : pct >= 50 ? "warn" : "ok";
+            return pct >= 90 ? "crit" : pct >= 70 ? "warn" : "ok";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
