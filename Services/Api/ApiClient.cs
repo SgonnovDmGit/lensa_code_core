@@ -77,6 +77,12 @@ namespace LenSa.Core.Services.Api
             try { log($"{tag}: {b}"); } catch { }
         }
 
+        private static void DiagResponse(string operation, HttpStatusCode statusCode, string body)
+        {
+            if (DiagLog == null) return;
+            Diag("response", ApiResponseDiagnosticFormatter.Format(operation, (int)statusCode, body));
+        }
+
         public ApiClient(string baseUrl)
             : this(baseUrl, new HttpClientHandler())
         {
@@ -167,7 +173,7 @@ namespace LenSa.Core.Services.Api
             using (submitResponse)
             {
                 var submitBody = await submitResponse.Content.ReadAsStringAsync(cancellationToken);
-                Diag($"submit HTTP {(int)submitResponse.StatusCode}", submitBody);
+                DiagResponse("submit", submitResponse.StatusCode, submitBody);
 
                 if (submitResponse.StatusCode == HttpStatusCode.OK)
                     return DeserializeOrThrow<ChatResponse>(submitBody);
@@ -240,7 +246,7 @@ namespace LenSa.Core.Services.Api
                 using (pollResponse)
                 {
                     var pollBody = await pollResponse.Content.ReadAsStringAsync(cancellationToken);
-                    Diag($"poll HTTP {(int)pollResponse.StatusCode}", pollBody);
+                    DiagResponse("poll", pollResponse.StatusCode, pollBody);
 
                     if (!pollResponse.IsSuccessStatusCode)
                     {
