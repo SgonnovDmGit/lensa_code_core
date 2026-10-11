@@ -116,6 +116,42 @@ namespace LenSa.Core.Services.Api
         [JsonPropertyName("clientTools")]
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string[]? ClientTools { get; set; }
+
+        [JsonPropertyName("editorContext")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public EditorContextDto? EditorContext { get; set; }
+    }
+
+    /// <summary>Transient cursor location for a fresh chat request; deliberately contains no source text.</summary>
+    public sealed class EditorContextDto
+    {
+        [JsonPropertyName("kind")]
+        public string Kind { get; set; } = string.Empty;
+
+        [JsonPropertyName("name")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string? Name { get; set; }
+
+        [JsonPropertyName("startLine")]
+        public int StartLine { get; set; }
+
+        [JsonPropertyName("endLine")]
+        public int EndLine { get; set; }
+
+        [JsonPropertyName("caretLine")]
+        public int CaretLine { get; set; }
+
+        [JsonPropertyName("hasSelection")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public bool HasSelection { get; set; }
+
+        [JsonPropertyName("selStartLine")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public int SelStartLine { get; set; }
+
+        [JsonPropertyName("selEndLine")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        public int SelEndLine { get; set; }
     }
 
     // --- Async chat (ANNOUNCE-007 / server v0.51.0) ---
