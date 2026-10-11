@@ -545,10 +545,13 @@ namespace LenSa.Core.Chat.ViewModels
         // изменении: состав, порядок, статус, галочка, трекер. Файл крошечный, дебаунс не нужен.
         private bool _suppressPersist;
 
+        /// <summary>Заголовок доски от продукта; Core не определяет метаданные диалога.</summary>
+        protected virtual string? TaskBoardTitle => null;
+
         private void PersistTaskBoard()
         {
             if (_suppressPersist || string.IsNullOrEmpty(SessionId)) return;
-            TaskBoardStore.Save(SessionId, TaskBoard);
+            TaskBoardStore.Save(SessionId, TaskBoard, TaskBoardTitle);
         }
 
         /// <summary>
