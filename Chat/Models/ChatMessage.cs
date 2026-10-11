@@ -41,9 +41,10 @@ namespace LenSa.Core.Chat.Models
         private List<ToolResultItem>? _toolResults;
         private string? _reasoningText;
         private string? _reasoningEffort;
-        private int _promptTokens;
-        private int _completionTokens;
-        private int _totalTokens;
+        private int? _promptTokensValue;
+        private int? _completionTokensValue;
+        private int? _totalTokensValue;
+        private int? _cachedTokensValue;
         private decimal? _costCoins;
         private decimal? _costUsd;
         private decimal? _costRub;
@@ -57,6 +58,7 @@ namespace LenSa.Core.Chat.Models
         private int? _checkpointWindowTokensAfterEstimate;
         private int? _checkpointWindowTokensAfterActual;
         private bool _isSummaryExpanded;
+        private ChainStats? _callMetrics;
 
         public string Role { get; set; } = string.Empty;
 
@@ -127,6 +129,13 @@ namespace LenSa.Core.Chat.Models
 
         public bool HasChain => _chain != null;
 
+        /// <summary>Per-assistant-round metrics; Chain is the completed turn aggregate.</summary>
+        public ChainStats? CallMetrics
+        {
+            get => _callMetrics;
+            set => SetProperty(ref _callMetrics, value);
+        }
+
         // Reasoning (REQ-007 / REQ-008, server v0.59.0). Пустые ⟺ ход без размышлений.
         public string? ReasoningText
         {
@@ -149,11 +158,24 @@ namespace LenSa.Core.Chat.Models
 
         public int PromptTokens
         {
-            get => _promptTokens;
+            get => _promptTokensValue ?? 0;
             set
             {
-                if (SetProperty(ref _promptTokens, value))
+                if (SetProperty(ref _promptTokensValue, (int?)value))
                     OnPropertyChanged(nameof(HasTokens));
+            }
+        }
+
+        public int? PromptTokensValue
+        {
+            get => _promptTokensValue;
+            set
+            {
+                if (SetProperty(ref _promptTokensValue, value))
+                {
+                    OnPropertyChanged(nameof(PromptTokens));
+                    OnPropertyChanged(nameof(HasTokens));
+                }
             }
         }
 
@@ -162,30 +184,62 @@ namespace LenSa.Core.Chat.Models
         /// ИЛИ провайдер не отдал разбивку»: сервер эти два случая не различает и ноль не шлёт
         /// вовсе, поэтому и мы строку прячем, а не пишем «0 из кэша» (T-000146).
         /// </summary>
-        private int _cachedTokens;
         public int CachedTokens
         {
-            get => _cachedTokens;
-            set => SetProperty(ref _cachedTokens, value);
+            get => _cachedTokensValue ?? 0;
+            set => CachedTokensValue = value;
+        }
+
+        public int? CachedTokensValue
+        {
+            get => _cachedTokensValue;
+            set
+            {
+                if (SetProperty(ref _cachedTokensValue, value))
+                    OnPropertyChanged(nameof(CachedTokens));
+            }
         }
 
         public int CompletionTokens
         {
-            get => _completionTokens;
+            get => _completionTokensValue ?? 0;
             set
             {
-                if (SetProperty(ref _completionTokens, value))
+                if (SetProperty(ref _completionTokensValue, (int?)value))
                     OnPropertyChanged(nameof(HasTokens));
+            }
+        }
+
+        public int? CompletionTokensValue
+        {
+            get => _completionTokensValue;
+            set
+            {
+                if (SetProperty(ref _completionTokensValue, value))
+                {
+                    OnPropertyChanged(nameof(CompletionTokens));
+                    OnPropertyChanged(nameof(HasTokens));
+                }
             }
         }
 
         public int TotalTokens
         {
-            get => _totalTokens;
-            set => SetProperty(ref _totalTokens, value);
+            get => _totalTokensValue ?? 0;
+            set => TotalTokensValue = value;
         }
 
-        public bool HasTokens => _promptTokens > 0 || _completionTokens > 0;
+        public int? TotalTokensValue
+        {
+            get => _totalTokensValue;
+            set
+            {
+                if (SetProperty(ref _totalTokensValue, value))
+                    OnPropertyChanged(nameof(TotalTokens));
+            }
+        }
+
+        public bool HasTokens => _promptTokensValue > 0 || _completionTokensValue > 0;
 
         // Cost per-message. Nullable — отсутствие ≠ «0», а «неизвестно»
         // (биллинг off / цена модели не посчитана / commit failed).

@@ -40,19 +40,13 @@ namespace LenSa.Core.Chat.ViewModels
         // Старт в SendMessageAsync, накопление в ChainAccumulate, финал ставит
         // ChainStats на последнее сообщение (там рендерится чип «i»).
         private DateTime _chainStartUtc;
-        private int _chainPromptTokens;
-        private int _chainCompletionTokens;
-        private int _chainCachedTokens;
-        private decimal? _chainCoins;
+        private ChainStats? _chainAggregate;
 
         /// <summary>Сброс агрегата цепочки — начало нового хода.</summary>
         protected void ChainStart()
         {
             _chainStartUtc = DateTime.UtcNow;
-            _chainPromptTokens = 0;
-            _chainCompletionTokens = 0;
-            _chainCachedTokens = 0;
-            _chainCoins = null;
+            _chainAggregate = null;
         }
 
         /// <summary>
@@ -62,22 +56,16 @@ namespace LenSa.Core.Chat.ViewModels
         /// </summary>
         protected void ChainAccumulate(ChatMessage msg, bool isFinal)
         {
-            _chainPromptTokens += msg.PromptTokens;
-            _chainCompletionTokens += msg.CompletionTokens;
-            _chainCachedTokens += msg.CachedTokens;
-            if (msg.CostCoins.HasValue)
-                _chainCoins = (_chainCoins ?? 0m) + msg.CostCoins.Value;
+            var round = msg.CallMetrics ?? ChainStats.FromLegacyMessage(msg);
+            if (msg.CallMetrics is null)
+                msg.CallMetrics = round;
 
-            if (!isFinal) return;
-
-            msg.Chain = new ChainStats
+            _chainAggregate = ChainStats.Accumulate(_chainAggregate, round, isFinal);
+            if (isFinal)
             {
-                PromptTokens = _chainPromptTokens,
-                CompletionTokens = _chainCompletionTokens,
-                CachedTokens = _chainCachedTokens,
-                CostCoins = _chainCoins,
-                WallSeconds = (DateTime.UtcNow - _chainStartUtc).TotalSeconds
-            };
+                _chainAggregate.WallSeconds = (DateTime.UtcNow - _chainStartUtc).TotalSeconds;
+                msg.Chain = _chainAggregate;
+            }
         }
 
         /// <summary>
@@ -827,6 +815,7 @@ namespace LenSa.Core.Chat.ViewModels
                 {
                     Role = Models.MessageRoles.Checkpoint,
                     Content = r.Summary,
+                    ModelName = r.Model ?? string.Empty,
                     CheckpointTrigger = "manual",
                     CheckpointTokensBefore = r.TokensBefore,
                     CheckpointWindowTokensAfterEstimate = after
@@ -1159,6 +1148,7 @@ namespace LenSa.Core.Chat.ViewModels
                 cachedTokens: retry.CachedTokens ?? 0,
                 toolUses: retry.ToolUses,
                 hasLegacyCodeChanges: retry.CodeChanges is { Length: > 0 });
+            msg.CallMetrics = ChainStats.FromRetry(retry, DateTimeOffset.Now);
             Messages.Add(msg);
             AttachToolCalls(msg);
             ChainAccumulate(msg, isFinal: retry.ToolUses is not { Length: > 0 } || retry.RetryExhausted);
@@ -1322,6 +1312,7 @@ namespace LenSa.Core.Chat.ViewModels
                 cachedTokens: response.CachedTokens ?? 0,
                 toolUses: response.ToolUses,
                 hasLegacyCodeChanges: response.CodeChanges is { Length: > 0 });
+            msg.CallMetrics = ChainStats.FromResponse(response, DateTimeOffset.Now);
             Messages.Add(msg);
             AttachToolCalls(msg);
             ChainAccumulate(msg, isFinal: response.ToolUses is not { Length: > 0 });

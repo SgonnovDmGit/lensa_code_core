@@ -240,13 +240,31 @@ namespace LenSa.Core.Services.Api
         public string ModelDisplayName { get; set; } = string.Empty;
 
         [JsonPropertyName("promptTokens")]
-        public int PromptTokens { get; set; }
+        public int? PromptTokensValue { get; set; }
+        [JsonIgnore]
+        public int PromptTokens { get => PromptTokensValue ?? 0; set => PromptTokensValue = value; }
 
         [JsonPropertyName("completionTokens")]
-        public int CompletionTokens { get; set; }
+        public int? CompletionTokensValue { get; set; }
+        [JsonIgnore]
+        public int CompletionTokens { get => CompletionTokensValue ?? 0; set => CompletionTokensValue = value; }
 
         [JsonPropertyName("totalTokens")]
-        public int TotalTokens { get; set; }
+        public int? TotalTokensValue { get; set; }
+        [JsonIgnore]
+        public int TotalTokens { get => TotalTokensValue ?? 0; set => TotalTokensValue = value; }
+
+        [JsonPropertyName("cacheWriteTokens")]
+        public int? CacheWriteTokens { get; set; }
+
+        [JsonPropertyName("genMs")]
+        public long? GenMs { get; set; }
+
+        [JsonPropertyName("tokensPerSec")]
+        public double? TokensPerSec { get; set; }
+
+        [JsonPropertyName("turnElapsedMs")]
+        public long? TurnElapsedMs { get; set; }
 
         [JsonPropertyName("codeChanges")]
         public CodeChangeDto[]? CodeChanges { get; set; }
@@ -530,13 +548,31 @@ namespace LenSa.Core.Services.Api
         public ChatToolLastFailure? LastFailure { get; set; }
 
         [JsonPropertyName("promptTokens")]
-        public int PromptTokens { get; set; }
+        public int? PromptTokensValue { get; set; }
+        [JsonIgnore]
+        public int PromptTokens { get => PromptTokensValue ?? 0; set => PromptTokensValue = value; }
 
         [JsonPropertyName("completionTokens")]
-        public int CompletionTokens { get; set; }
+        public int? CompletionTokensValue { get; set; }
+        [JsonIgnore]
+        public int CompletionTokens { get => CompletionTokensValue ?? 0; set => CompletionTokensValue = value; }
 
         [JsonPropertyName("totalTokens")]
-        public int TotalTokens { get; set; }
+        public int? TotalTokensValue { get; set; }
+        [JsonIgnore]
+        public int TotalTokens { get => TotalTokensValue ?? 0; set => TotalTokensValue = value; }
+
+        [JsonPropertyName("cacheWriteTokens")]
+        public int? CacheWriteTokens { get; set; }
+
+        [JsonPropertyName("genMs")]
+        public long? GenMs { get; set; }
+
+        [JsonPropertyName("tokensPerSec")]
+        public double? TokensPerSec { get; set; }
+
+        [JsonPropertyName("turnElapsedMs")]
+        public long? TurnElapsedMs { get; set; }
 
         [JsonPropertyName("toolUses")]
         public ToolUseDTO[]? ToolUses { get; set; }
@@ -879,6 +915,9 @@ namespace LenSa.Core.Services.Api
         [JsonPropertyName("tokensPerSec")]
         public double? TokensPerSec { get; set; }
 
+        [JsonPropertyName("turnElapsedMs")]
+        public long? TurnElapsedMs { get; set; }
+
         /// <summary>
         /// Размышления модели по ходу (сервер отдаёт с v0.59.0, включая строки tool_use).
         /// Мы их не рендерили — и получали «голые карточки» вызовов без комментария: reasoning-
@@ -899,6 +938,12 @@ namespace LenSa.Core.Services.Api
         /// <summary>Prompt-токены хода из кэша (REQ-027). Присутствует ⟺ > 0.</summary>
         [JsonPropertyName("cachedTokens")]
         public int? CachedTokens { get; set; }
+
+        [JsonPropertyName("cacheWriteTokens")]
+        public int? CacheWriteTokens { get; set; }
+
+        [JsonPropertyName("contextFill")]
+        public ContextFillDto? ContextFill { get; set; }
 
         [JsonPropertyName("checkpointTrigger")]
         public string? CheckpointTrigger { get; set; }

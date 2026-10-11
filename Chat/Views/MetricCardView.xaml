@@ -1,0 +1,9 @@
+<UserControl x:Class="LenSa.Core.Chat.Views.MetricCardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             MinWidth="0" Width="330" Foreground="{DynamicResource PrimaryForeground}">
+    <Border Background="{DynamicResource PopupBackground}"
+            BorderBrush="{DynamicResource PopupBorder}" BorderThickness="1" CornerRadius="9">
+        <StackPanel x:Name="CardBody"/>
+    </Border>
+</UserControl>

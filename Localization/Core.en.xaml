@@ -170,4 +170,32 @@
     <sys:String x:Key="str_Chat_LastToolFailure">Last failed tool — {0}: {1}</sys:String>
     <sys:String x:Key="str_Chat_RetryToolFailed">The tool did not complete the turn.</sys:String>
     <sys:String x:Key="str_InputLimitHint">Message length. The server accepts at most 64,000 characters — sending is blocked above that, but your text stays put: you decide what to cut.</sys:String>
+    <!-- T-000189: metrics footer, quick hover and turn/compaction card. -->
+    <sys:String x:Key="str_MetricTurn">Turn</sys:String>
+    <sys:String x:Key="str_MetricCompaction">Context compaction</sys:String>
+    <sys:String x:Key="str_MetricCoins">Coins</sys:String>
+    <sys:String x:Key="str_MetricDate">Date</sys:String>
+    <sys:String x:Key="str_MetricClickHint">Click to expand</sys:String>
+    <sys:String x:Key="str_MetricReasoning" xml:space="preserve">Reasoning: </sys:String>
+    <sys:String x:Key="str_MetricContextAfter">Context after</sys:String>
+    <sys:String x:Key="str_MetricOf">of</sys:String>
+    <sys:String x:Key="str_MetricWindow">CONTEXT WINDOW</sys:String>
+    <sys:String x:Key="str_MetricBefore">Before compaction</sys:String>
+    <sys:String x:Key="str_MetricAfterEstimate">After · estimate</sys:String>
+    <sys:String x:Key="str_MetricAfterActual">After · actual</sys:String>
+    <sys:String x:Key="str_MetricWindowHint">Window occupancy before compaction, the estimate immediately after it, and the next turn's measurement.</sys:String>
+    <sys:String x:Key="str_MetricTokens">TOKENS</sys:String>
+    <sys:String x:Key="str_MetricIncoming">Incoming</sys:String>
+    <sys:String x:Key="str_MetricCached">From cache</sys:String>
+    <sys:String x:Key="str_MetricNew">New</sys:String>
+    <sys:String x:Key="str_MetricCacheWrite">Written to cache</sys:String>
+    <sys:String x:Key="str_MetricOutgoing">Outgoing</sys:String>
+    <sys:String x:Key="str_MetricTotalTokens">Total</sys:String>
+    <sys:String x:Key="str_MetricTime">TIME</sys:String>
+    <sys:String x:Key="str_MetricTotalTime">Total</sys:String>
+    <sys:String x:Key="str_MetricGeneration">AI generation</sys:String>
+    <sys:String x:Key="str_MetricSpeed">Generation speed</sys:String>
+    <sys:String x:Key="str_MetricCoinsUnit">coins</sys:String>
+    <sys:String x:Key="str_MetricSecondsUnit">sec</sys:String>
+    <sys:String x:Key="str_MetricSpeedUnit">tokens/sec</sys:String>
 </ResourceDictionary>

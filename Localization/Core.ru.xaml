@@ -170,4 +170,32 @@
     <sys:String x:Key="str_Chat_LastToolFailure">Последний инструмент — {0}: {1}</sys:String>
     <sys:String x:Key="str_Chat_RetryToolFailed">Инструмент не завершил ход.</sys:String>
     <sys:String x:Key="str_InputLimitHint">Длина сообщения. Сервер принимает не больше 64 000 символов — при превышении отправка блокируется, но текст остаётся на месте: решайте сами, что сократить.</sys:String>
+    <!-- T-000189: metrics footer, quick hover and turn/compaction card. -->
+    <sys:String x:Key="str_MetricTurn">Ход</sys:String>
+    <sys:String x:Key="str_MetricCompaction">Сжатие контекста</sys:String>
+    <sys:String x:Key="str_MetricCoins">Монеты</sys:String>
+    <sys:String x:Key="str_MetricDate">Дата</sys:String>
+    <sys:String x:Key="str_MetricClickHint">Нажмите, чтобы раскрыть</sys:String>
+    <sys:String x:Key="str_MetricReasoning" xml:space="preserve">Размышления: </sys:String>
+    <sys:String x:Key="str_MetricContextAfter">Контекст после</sys:String>
+    <sys:String x:Key="str_MetricOf">из</sys:String>
+    <sys:String x:Key="str_MetricWindow">ОКНО КОНТЕКСТА</sys:String>
+    <sys:String x:Key="str_MetricBefore">До сжатия</sys:String>
+    <sys:String x:Key="str_MetricAfterEstimate">После · оценка</sys:String>
+    <sys:String x:Key="str_MetricAfterActual">После · факт</sys:String>
+    <sys:String x:Key="str_MetricWindowHint">Занятость окна до сжатия, оценка сразу после него и замер следующего хода.</sys:String>
+    <sys:String x:Key="str_MetricTokens">ТОКЕНЫ</sys:String>
+    <sys:String x:Key="str_MetricIncoming">Входящие</sys:String>
+    <sys:String x:Key="str_MetricCached">Из кэша</sys:String>
+    <sys:String x:Key="str_MetricNew">Новые</sys:String>
+    <sys:String x:Key="str_MetricCacheWrite">В кэш записано</sys:String>
+    <sys:String x:Key="str_MetricOutgoing">Исходящие</sys:String>
+    <sys:String x:Key="str_MetricTotalTokens">Всего</sys:String>
+    <sys:String x:Key="str_MetricTime">ВРЕМЯ</sys:String>
+    <sys:String x:Key="str_MetricTotalTime">Всего</sys:String>
+    <sys:String x:Key="str_MetricGeneration">Генерация ИИ</sys:String>
+    <sys:String x:Key="str_MetricSpeed">Скорость генерации</sys:String>
+    <sys:String x:Key="str_MetricCoinsUnit">монеты</sys:String>
+    <sys:String x:Key="str_MetricSecondsUnit">сек</sys:String>
+    <sys:String x:Key="str_MetricSpeedUnit">токенов/сек</sys:String>
 </ResourceDictionary>

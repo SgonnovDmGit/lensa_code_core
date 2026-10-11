@@ -350,60 +350,9 @@
                         </StackPanel>
                     </Border>
 
-                    <!-- Чип аналитики цепочки: DisplayName модели + «i» с 2-ярусным хинтом -->
-                    <StackPanel Orientation="Horizontal"
-                                HorizontalAlignment="Right"
-                                Margin="0,6,0,0"
-                                Visibility="{Binding HasChain, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="{Binding ModelName}"
-                                   FontSize="11"
-                                   VerticalAlignment="Center"
-                                   Margin="0,0,8,0"
-                                   Foreground="{DynamicResource SecondaryForeground}"/>
-                        <Border Width="22" Height="22" CornerRadius="11"
-                                Background="{DynamicResource SecondaryBackground}"
-                                BorderBrush="{DynamicResource BorderColor}"
-                                BorderThickness="1"
-                                ToolTipService.InitialShowDelay="150"
-                                ToolTipService.ShowDuration="60000">
-                            <TextBlock Text="i" FontFamily="Georgia" FontStyle="Italic" FontWeight="SemiBold"
-                                       FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center"
-                                       Foreground="{DynamicResource SecondaryForeground}"/>
-                            <Border.ToolTip>
-                                <!-- Вверх и влево от чипа (смок): Top + сдвиг так, чтобы
-                                     правый край хинта лёг к чипу, а не уходил за окно -->
-                                <ToolTip Background="{DynamicResource PopupBackground}"
-                                         BorderBrush="{DynamicResource PopupBorder}"
-                                         Foreground="{DynamicResource PrimaryForeground}"
-                                         Placement="Top"
-                                         HorizontalOffset="-205"
-                                         Padding="0">
-                                    <StackPanel Width="222" Margin="0,6">
-                                        <TextBlock Text="{DynamicResource str_ChainTokens}"
-                                                   FontSize="10.5" FontWeight="SemiBold" Margin="13,2,13,4"
-                                                   Foreground="{DynamicResource AccentColor}"/>
-                                        <Separator Margin="0,0,0,3"/>
-                                        <DockPanel Margin="13,2"><TextBlock Text="{DynamicResource str_ChainPrompt}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding Chain.PromptTokens, StringFormat={}{0:N0}}" FontSize="12"/></DockPanel>
-                                        <!-- «Из кэша» (T-000146): стоит под входными токенами, потому что объясняет
-                                             именно их цену — на длинных диалогах и tool-циклах бóльшая часть входа
-                                             читается из кэша и стоит в разы дешевле. Строки нет, когда кэша не было:
-                                             сервер ноль не отдаёт вовсе (у провайдера с непрозрачным маршрутом «ноль»
-                                             и «нет данных» неразличимы), и писать «0 из кэша» значило бы врать. -->
-                                        <DockPanel Margin="13,2" Visibility="{Binding Chain.HasCached, Converter={StaticResource BoolToVis}}"><TextBlock Text="{DynamicResource str_ChainCached}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding Chain.CachedDisplay}" FontSize="12" Foreground="{DynamicResource AccentColor}"/></DockPanel>
-                                        <DockPanel Margin="13,2"><TextBlock Text="{DynamicResource str_ChainCompletion}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding Chain.CompletionTokens, StringFormat={}{0:N0}}" FontSize="12"/></DockPanel>
-                                        <DockPanel Margin="13,2"><TextBlock Text="{DynamicResource str_ChainTotal}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding Chain.TotalTokens, StringFormat={}{0:N0}}" FontSize="12"/></DockPanel>
-                                        <DockPanel Margin="13,2"><TextBlock Text="{DynamicResource str_ChainSpeed}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding Chain.SpeedDisplay}" FontSize="12"/></DockPanel>
-                                        <TextBlock Text="{DynamicResource str_ChainCost}"
-                                                   FontSize="10.5" FontWeight="SemiBold" Margin="13,8,13,4"
-                                                   Foreground="{DynamicResource AccentColor}"/>
-                                        <Separator Margin="0,0,0,3"/>
-                                        <DockPanel Margin="13,2" Visibility="{Binding Chain.HasCoins, Converter={StaticResource BoolToVis}}"><TextBlock Text="{DynamicResource str_ChainCoins}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding Chain.CoinsDisplay}" FontSize="12"/></DockPanel>
-                                        <DockPanel Margin="13,2"><TextBlock Text="{DynamicResource str_ChainWallTime}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding Chain.WallDisplay}" FontSize="12"/></DockPanel>
-                                    </StackPanel>
-                                </ToolTip>
-                            </Border.ToolTip>
-                        </Border>
-                    </StackPanel>
+                    <!-- T-000189: model, final response time and keyboard-accessible metrics. -->
+                    <views:MetricChip Message="{Binding}" HorizontalAlignment="Right" Margin="0,6,0,0"
+                                      Visibility="{Binding HasChain, Converter={StaticResource BoolToVis}}"/>
                 </StackPanel>
             </Grid>
         </DataTemplate>
@@ -467,15 +416,21 @@
                     Padding="12,8"
                     Margin="24,10,24,10">
                 <StackPanel>
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
                         <TextBlock Text="⇲" FontSize="13" Margin="0,0,7,0"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SecondaryForeground}"/>
-                        <TextBlock Text="{DynamicResource str_Chat_ContextCompacted}"
+                        <TextBlock Grid.Column="1" Text="{DynamicResource str_Chat_ContextCompacted}"
                                    FontSize="11" FontWeight="SemiBold"
                                    VerticalAlignment="Center"
                                    Foreground="{DynamicResource SecondaryForeground}"/>
-                    </StackPanel>
+                        <views:MetricChip Grid.Column="2" Message="{Binding}" ShowFooter="False" Margin="8,0,0,0"/>
+                    </Grid>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                         <TextBlock Text="{DynamicResource str_Chat_CheckpointAuto}"
                                    Foreground="{DynamicResource SecondaryForeground}">
