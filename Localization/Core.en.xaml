@@ -56,6 +56,14 @@
 
     <!-- Reasoning block -->
     <sys:String x:Key="str_Chat_Reasoning">Reasoning</sys:String>
+    <sys:String x:Key="str_ReasoningLevelNone">No reasoning</sys:String>
+    <sys:String x:Key="str_ReasoningLevelMinimal">Minimal</sys:String>
+    <sys:String x:Key="str_ReasoningLevelLow">Low</sys:String>
+    <sys:String x:Key="str_ReasoningLevelMedium">Medium</sys:String>
+    <sys:String x:Key="str_ReasoningLevelHigh">High</sys:String>
+    <sys:String x:Key="str_ReasoningLevelXHigh">Extra</sys:String>
+    <sys:String x:Key="str_ReasoningLevelMax">Max</sys:String>
+    <sys:String x:Key="str_ReasoningNoLevels">No available levels</sys:String>
 
     <!-- Tool card -->
     <sys:String x:Key="str_Chat_ToolStatusSuccess">success</sys:String>

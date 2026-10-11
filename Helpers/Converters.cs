@@ -360,19 +360,41 @@ namespace LenSa.Core.Helpers
         }
     }
 
-    /// <summary>Уровень размышлений → подпись. Английские имена: русские разной длины,
-    /// и чип от них скачет по ширине.</summary>
+    /// <summary>Maps known reasoning tokens to localized labels and theme brushes.</summary>
     public class ReasoningNameConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) =>
-            (value as string) switch
-            {
-                "minimal" => "Minimal",
-                "low" => "Low",
-                "medium" => "Medium",
-                "high" => "High",
-                _ => "Off"
-            };
+        public static string? ResourceKeyFor(string? token) => token?.Trim().ToLowerInvariant() switch
+        {
+            "none" => "str_ReasoningLevelNone",
+            "minimal" => "str_ReasoningLevelMinimal",
+            "low" => "str_ReasoningLevelLow",
+            "medium" => "str_ReasoningLevelMedium",
+            "high" => "str_ReasoningLevelHigh",
+            "xhigh" => "str_ReasoningLevelXHigh",
+            "max" => "str_ReasoningLevelMax",
+            _ => null
+        };
+
+        public static string BrushKeyFor(string? token) => token?.Trim().ToLowerInvariant() switch
+        {
+            "none" => "ReasoningOff",
+            "minimal" => "ReasoningMinimal",
+            "low" => "ReasoningLow",
+            "medium" => "ReasoningMedium",
+            "high" => "ReasoningHigh",
+            "xhigh" => "ReasoningXHigh",
+            "max" => "ReasoningMax",
+            _ => "SecondaryForeground"
+        };
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var token = value as string;
+            var key = ResourceKeyFor(token);
+            return key is null
+                ? token ?? string.Empty
+                : Application.Current?.TryFindResource(key) as string ?? token!;
+        }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) =>
             throw new NotSupportedException();

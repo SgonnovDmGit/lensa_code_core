@@ -431,6 +431,10 @@ namespace LenSa.Core.Services.Api
         [JsonPropertyName("contextLength")]
         public int ContextLength { get; set; }
 
+        [JsonPropertyName("reasoningEfforts")]
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+        public string[]? ReasoningEfforts { get; set; }
+
         // Coin-цены (ANNOUNCE-004 v0.33.0 — USD-поля promptPrice/completionPrice/priceOverridden удалены)
         [JsonPropertyName("promptPriceCoins")]
         public decimal PromptPriceCoins { get; set; }

@@ -69,6 +69,8 @@
     <SolidColorBrush x:Key="ReasoningLow" Color="#4FB489"/>
     <SolidColorBrush x:Key="ReasoningMedium" Color="#E5A050"/>
     <SolidColorBrush x:Key="ReasoningHigh" Color="#CC5DE8"/>
+    <SolidColorBrush x:Key="ReasoningXHigh" Color="#9775FA"/>
+    <SolidColorBrush x:Key="ReasoningMax" Color="#D0BFFF"/>
 
     <!-- Режимы: цвет по «развязанности рук», а не по светофору.
          Ревью БЫЛО лиловым — оно роднилось с виноградным кружком максимума размышлений

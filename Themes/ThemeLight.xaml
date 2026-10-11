@@ -71,6 +71,8 @@
     <SolidColorBrush x:Key="ReasoningLow" Color="#2F9E6B"/>
     <SolidColorBrush x:Key="ReasoningMedium" Color="#E08B2E"/>
     <SolidColorBrush x:Key="ReasoningHigh" Color="#9C36B5"/>
+    <SolidColorBrush x:Key="ReasoningXHigh" Color="#6741D9"/>
+    <SolidColorBrush x:Key="ReasoningMax" Color="#3B2A99"/>
 
     <!-- Режимы: цвет по «развязанности рук», а не по светофору. Зелёный не берём —
          он читается как «безопасно», а Авто самый рискованный.

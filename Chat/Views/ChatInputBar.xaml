@@ -4,6 +4,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:helpers="clr-namespace:LenSa.Core.Helpers"
+             xmlns:views="clr-namespace:LenSa.Core.Chat.Views"
              mc:Ignorable="d" d:DesignWidth="900">
     <!--
       Композер (мокап 2026-07-12, принят). Живёт ПОД лентой чата, внутри колонки чата —
@@ -179,6 +180,12 @@
                                                 <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="high">
                                                     <Setter Property="Fill" Value="{DynamicResource ReasoningHigh}"/>
                                                 </DataTrigger>
+                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="xhigh">
+                                                    <Setter Property="Fill" Value="{DynamicResource ReasoningXHigh}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="max">
+                                                    <Setter Property="Fill" Value="{DynamicResource ReasoningMax}"/>
+                                                </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Ellipse.Style>
@@ -254,36 +261,8 @@
                                     <Separator Margin="6,6" Background="{DynamicResource BorderColor}"/>
 
                                     <TextBlock Text="{DynamicResource str_Reasoning}" Style="{StaticResource PopupHead}"/>
-                                    <!-- Ползунок на 5 положений: off | minimal | low | medium | high.
-                                         Это существующий серверный контракт (REQ-007), не выдуманная шкала. -->
-                                    <Slider Margin="10,2,10,0"
-                                            Minimum="0" Maximum="4" TickFrequency="1"
-                                            IsSnapToTickEnabled="True" TickPlacement="BottomRight"
-                                            Value="{Binding ProjectSettings.ReasoningSelection, Converter={StaticResource ReasoningIndex}, Mode=TwoWay}"
-                                            ToolTip="{DynamicResource str_ReasoningEffortHelp}"/>
-                                    <TextBlock HorizontalAlignment="Center" Margin="0,3,0,4"
-                                               FontSize="12" FontWeight="Bold"
-                                               Text="{Binding ProjectSettings.ReasoningSelection, Converter={StaticResource ReasoningName}, Mode=OneWay}">
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Foreground" Value="{DynamicResource ReasoningOff}"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="minimal">
-                                                        <Setter Property="Foreground" Value="{DynamicResource ReasoningMinimal}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="low">
-                                                        <Setter Property="Foreground" Value="{DynamicResource ReasoningLow}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="medium">
-                                                        <Setter Property="Foreground" Value="{DynamicResource ReasoningMedium}"/>
-                                                    </DataTrigger>
-                                                    <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="high">
-                                                        <Setter Property="Foreground" Value="{DynamicResource ReasoningHigh}"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
+                                    <views:ReasoningSelector Model="{Binding ProjectSettings.SelectedModel}"
+                                                             SelectedEffort="{Binding ProjectSettings.ReasoningSelection, Mode=TwoWay}"/>
                                 </StackPanel>
                             </Border>
                         </Popup>
