@@ -213,8 +213,11 @@ namespace LenSa.Core.Chat.ViewModels
         /// <summary>Ручное сжатие контекста диалога (T-000133).</summary>
         public ICommand CompactContextCommand { get; }
 
-        /// <summary>Product-specific data gate; consumers without a context ring keep the legacy behavior.</summary>
-        protected virtual bool CanCompactContext => true;
+        /// <summary>Whether the current session has a server-provided context snapshot.</summary>
+        public virtual bool HasContextFill => false;
+
+        /// <summary>Consumers without a context snapshot cannot start a paid compaction.</summary>
+        protected virtual bool CanCompactContext => HasContextFill;
 
         private bool CanExecuteCompactContext =>
             !string.IsNullOrEmpty(SessionId) && !IsBusy && CanCompactContext;
@@ -805,22 +808,18 @@ namespace LenSa.Core.Chat.ViewModels
         {
             if (!CanExecuteCompactContext) return;
 
+            var compactedSessionId = SessionId;
             IsBusy = true;
             try
             {
-                var r = await Api.CompactSessionAsync(SessionId);
+                var r = await Api.CompactSessionAsync(compactedSessionId);
+                if (!string.Equals(SessionId, compactedSessionId, StringComparison.Ordinal)) return;
 
-                var after = r.ContextFill?.WindowTokens ?? r.WindowTokensAfterEstimate ?? r.TokensAfterEstimate;
-                Messages.Add(new ChatMessage
-                {
-                    Role = Models.MessageRoles.Checkpoint,
-                    Content = r.Summary,
-                    ModelName = r.Model ?? string.Empty,
-                    CheckpointTrigger = "manual",
-                    CheckpointTokensBefore = r.TokensBefore,
-                    CheckpointWindowTokensAfterEstimate = after
-                });
                 OnContextCompacted(r);
+
+                var checkpoint = await CreateCompactedCheckpointAsync(r);
+                if (string.Equals(SessionId, compactedSessionId, StringComparison.Ordinal))
+                    Messages.Add(checkpoint);
             }
             catch (ApiException ex) when (ex.ErrorCode == "COMPACTION_BELOW_FLOOR")
             {
@@ -852,6 +851,26 @@ namespace LenSa.Core.Chat.ViewModels
         /// ОЦЕНКА: честный замер придёт на следующем AI-ходе.
         /// </summary>
         protected virtual void OnContextCompacted(CompactResponse response) { }
+
+        /// <summary>
+        /// Create the timeline checkpoint after a successful compaction. Product consumers may
+        /// resolve the authoritative history row asynchronously; the base fallback preserves the
+        /// legacy behavior for consumers without a history replay pipeline.
+        /// </summary>
+        protected virtual Task<ChatMessage> CreateCompactedCheckpointAsync(CompactResponse response)
+        {
+            var after = response.ContextFill?.WindowTokens ?? response.WindowTokensAfterEstimate ??
+                        response.TokensAfterEstimate;
+            return Task.FromResult(new ChatMessage
+            {
+                Role = Models.MessageRoles.Checkpoint,
+                Content = response.Summary ?? string.Empty,
+                ModelName = response.Model ?? string.Empty,
+                CheckpointTrigger = "manual",
+                CheckpointTokensBefore = response.TokensBefore,
+                CheckpointWindowTokensAfterEstimate = after
+            });
+        }
 
         /// <summary>
         /// Прервать активный chat-ход (submit /chat/async или его polling). Идемпотентно —

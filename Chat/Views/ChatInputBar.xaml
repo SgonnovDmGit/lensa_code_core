@@ -191,10 +191,42 @@
                                     </Ellipse.Style>
                                     <Ellipse.ToolTip>
                                         <ToolTip>
-                                            <TextBlock>
-                                                <Run Text="{DynamicResource str_Reasoning}"/><Run Text=": "/><Run
-                                                    Text="{Binding ProjectSettings.ReasoningSelection, Converter={StaticResource ReasoningName}, Mode=OneWay}"/>
-                                            </TextBlock>
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{DynamicResource str_Reasoning}"/><TextBlock Text=": "/>
+                                                <TextBlock x:Name="ReasoningChipLabel">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="{Binding ProjectSettings.ReasoningSelection, Converter={StaticResource ReasoningName}, Mode=OneWay}"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="off">
+                                                                    <Setter Property="Text" Value="{DynamicResource str_ReasoningLevelNone}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="none">
+                                                                    <Setter Property="Text" Value="{DynamicResource str_ReasoningLevelNone}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="minimal">
+                                                                    <Setter Property="Text" Value="{DynamicResource str_ReasoningLevelMinimal}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="low">
+                                                                    <Setter Property="Text" Value="{DynamicResource str_ReasoningLevelLow}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="medium">
+                                                                    <Setter Property="Text" Value="{DynamicResource str_ReasoningLevelMedium}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="high">
+                                                                    <Setter Property="Text" Value="{DynamicResource str_ReasoningLevelHigh}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="xhigh">
+                                                                    <Setter Property="Text" Value="{DynamicResource str_ReasoningLevelXHigh}"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding ProjectSettings.ReasoningSelection}" Value="max">
+                                                                    <Setter Property="Text" Value="{DynamicResource str_ReasoningLevelMax}"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
                                         </ToolTip>
                                     </Ellipse.ToolTip>
                                 </Ellipse>
@@ -282,6 +314,9 @@
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter TargetName="RingHover" Property="Background" Value="{DynamicResource HoverBackground}"/>
                                         </Trigger>
+                                        <Trigger Property="IsEnabled" Value="False">
+                                            <Setter TargetName="RingHover" Property="Opacity" Value="0.4"/>
+                                        </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
@@ -354,11 +389,12 @@
                                                 Margin="0,7,0,0" Padding="0,6,0,0">
                                             <StackPanel MaxWidth="250">
                                                 <TextBlock Text="{DynamicResource str_CompactRingHint}" FontSize="12"
-                                                           TextWrapping="Wrap" Foreground="{DynamicResource SecondaryForeground}"/>
+                                                           TextWrapping="Wrap" Foreground="{DynamicResource SecondaryForeground}"
+                                                           Visibility="{Binding PlacementTarget.IsEnabled, RelativeSource={RelativeSource AncestorType=ToolTip}, Converter={StaticResource BoolToVis}}"/>
                                                 <TextBlock Text="{Binding ActiveChat.CompactUnavailableReason}" FontSize="11"
                                                            TextWrapping="Wrap" FontStyle="Italic" Margin="0,5,0,0"
                                                            Foreground="{DynamicResource SecondaryForeground}"
-                                                           Visibility="{Binding ActiveChat.CompactUnavailableReason, Converter={StaticResource EmptyToVis}}"/>
+                                                           Visibility="{Binding ActiveChat.CompactUnavailableReason, Converter={StaticResource EmptyToVis}, ConverterParameter=invert}"/>
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>

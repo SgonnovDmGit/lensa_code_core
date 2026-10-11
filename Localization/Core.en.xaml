@@ -153,7 +153,6 @@
     <sys:String x:Key="str_CompactNotConfigured">Context compaction is not configured</sys:String>
     <sys:String x:Key="str_CompactDisabled">Context compaction is disabled for this product</sys:String>
     <sys:String x:Key="str_CompactUnavailable">Context compaction is currently unavailable</sys:String>
-    <sys:String x:Key="str_CompactContextHint">Fold the older part of the dialog into a summary without waiting for the automatic trigger. Messages stay where they are. This is a billed AI call.</sys:String>
     <sys:String x:Key="str_ContextCompactedFmt">Context compacted: {0:N0} → ~{1:N0} tokens</sys:String>
     <sys:String x:Key="str_ContextCompacted">Context compacted</sys:String>
     <sys:String x:Key="str_CompactBelowFloor">Nothing to compact yet — the context is still small.</sys:String>

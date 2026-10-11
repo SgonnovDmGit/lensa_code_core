@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Threading;
 using System.Windows.Input;
 using System.Windows.Media;
 using LenSa.Core.Chat.Models;
@@ -19,6 +20,7 @@ namespace LenSa.Core.Chat.Views
         public static readonly DependencyProperty ShowFooterProperty = DependencyProperty.Register(
             nameof(ShowFooter), typeof(bool), typeof(MetricChip), new PropertyMetadata(true, FooterChanged));
         private static WeakReference<MetricChip>? _openChip;
+        private MetricCardView? _card;
 
         public ChatMessage? Message
         {
@@ -31,6 +33,9 @@ namespace LenSa.Core.Chat.Views
             set => SetValue(ShowFooterProperty, value);
         }
         public bool IsCardOpen => CardPopup.IsOpen;
+        private MetricCardView? Card => _card;
+        private bool _awaitingAnchorMouseDown;
+        private bool _suppressClickAfterPopupMouseClose;
 
         public MetricChip()
         {
@@ -49,29 +54,43 @@ namespace LenSa.Core.Chat.Views
         }
         private static void FooterChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e) =>
             ((MetricChip)sender).Refresh();
-        private void Message_PropertyChanged(object? sender, PropertyChangedEventArgs e) => Refresh();
-
-        private void Refresh()
+        private void Message_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (Card is null) return;
-            Card.Message = Message;
-            Card.Refresh();
-            var data = Message is null ? null : MetricCardBuilder.Build(Message, CultureInfo.CurrentCulture);
-            FooterModel.Text = data?.ModelName ?? string.Empty;
-            FooterTime.Text = data?.TimeText ?? string.Empty;
+            if (e.PropertyName is not (nameof(ChatMessage.ModelName) or nameof(ChatMessage.ReasoningEffort)
+                or nameof(ChatMessage.Chain) or nameof(ChatMessage.CallMetrics) or nameof(ChatMessage.CheckpointTrigger)
+                or nameof(ChatMessage.CheckpointTokensBefore) or nameof(ChatMessage.CheckpointWindowTokensAfterEstimate)
+                or nameof(ChatMessage.CheckpointWindowTokensAfterActual)))
+                return;
+            Refresh(rebuildCard: IsCardOpen);
+        }
+
+        private void Refresh(bool rebuildCard = false)
+        {
+            if (rebuildCard && Card is not null)
+            {
+                if (!ReferenceEquals(Card.Message, Message)) Card.Message = Message;
+                else Card.Refresh();
+            }
+            var stats = Message?.Chain ?? Message?.CallMetrics;
+            var model = Message?.ModelName;
+            var time = stats?.CreatedAt?.ToLocalTime().ToString("HH:mm", CultureInfo.CurrentCulture);
+            FooterModel.Text = model ?? string.Empty;
+            FooterTime.Text = time ?? string.Empty;
             FooterModel.Visibility = ShowFooter && !string.IsNullOrEmpty(FooterModel.Text)
                 ? Visibility.Visible : Visibility.Collapsed;
             FooterTime.Visibility = ShowFooter && !string.IsNullOrEmpty(FooterTime.Text)
                 ? Visibility.Visible : Visibility.Collapsed;
-            InfoButton.ToolTip = BuildQuickTip(data);
+            InfoButton.ToolTip = BuildQuickTip(
+                stats?.CostCoins?.ToString("F2", CultureInfo.CurrentCulture),
+                stats?.CreatedAt?.ToLocalTime().ToString("dd.MM.yyyy · HH:mm", CultureInfo.CurrentCulture));
         }
 
-        private ToolTip BuildQuickTip(MetricCardData? data)
+        private ToolTip BuildQuickTip(string? coins, string? date)
         {
             var body = new StackPanel();
-            if (data?.CoinsText is string coins)
+            if (coins is not null)
                 AddQuickRow(body, "str_MetricCoins", coins, "str_MetricCoinsUnit");
-            if (data?.DateText is string date)
+            if (date is not null)
                 AddQuickRow(body, "str_MetricDate", date, null);
             var hint = MetricCardView.Label("str_MetricClickHint", 10);
             hint.Margin = new Thickness(0, 5, 0, 0);
@@ -107,11 +126,12 @@ namespace LenSa.Core.Chat.Views
             if (Message is null) return;
             if (_openChip?.TryGetTarget(out var previous) == true && previous != this)
                 previous.CloseCard();
-            Refresh();
+            var card = EnsureCard();
+            Refresh(rebuildCard: true);
             var host = HostVisual();
             var maxWidth = host?.ActualWidth > 16 ? Math.Min(330, host.ActualWidth - 16) : 330;
-            Card.Width = double.NaN;
-            Card.MaxWidth = maxWidth;
+            card.Width = double.NaN;
+            card.MaxWidth = maxWidth;
             CardScroll.Width = maxWidth;
             CardScroll.MaxWidth = maxWidth;
             CardScroll.MaxHeight = host?.ActualHeight > 16 ? host.ActualHeight - 16 : 540;
@@ -121,6 +141,15 @@ namespace LenSa.Core.Chat.Views
         }
 
         public void CloseCard() { if (CardPopup is not null) CardPopup.IsOpen = false; }
+
+        private MetricCardView EnsureCard()
+        {
+            if (Card is not null) return Card;
+            _card = new MetricCardView();
+            CardScroll.Content = _card;
+            return _card;
+        }
+
         private FrameworkElement? HostVisual() => Window.GetWindow(this) ??
             PresentationSource.FromVisual(InfoButton)?.RootVisual as FrameworkElement;
 
@@ -137,7 +166,40 @@ namespace LenSa.Core.Chat.Views
             return new[] { new CustomPopupPlacement(point - (Vector)targetOrigin, PopupPrimaryAxis.None) };
         }
 
-        private void InfoButton_Click(object sender, RoutedEventArgs e) => ToggleCard();
+        private void InfoButton_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (_awaitingAnchorMouseDown)
+            {
+                _awaitingAnchorMouseDown = false;
+                _suppressClickAfterPopupMouseClose = true;
+                return;
+            }
+            // A prior down without its matching up was interrupted; do not let it consume this gesture.
+            _suppressClickAfterPopupMouseClose = false;
+            if (IsCardOpen)
+            {
+                _suppressClickAfterPopupMouseClose = true;
+                CloseCard();
+                _awaitingAnchorMouseDown = false;
+            }
+        }
+        private void InfoButton_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            _awaitingAnchorMouseDown = false;
+            if (!_suppressClickAfterPopupMouseClose) return;
+            Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+                _suppressClickAfterPopupMouseClose = false));
+        }
+        private void InfoButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_suppressClickAfterPopupMouseClose)
+            {
+                _suppressClickAfterPopupMouseClose = false;
+                e.Handled = true;
+                return;
+            }
+            ToggleCard();
+        }
         private void InfoButton_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key is Key.Enter or Key.Space) { ToggleCard(); e.Handled = true; }
@@ -150,6 +212,17 @@ namespace LenSa.Core.Chat.Views
         private void CardPopup_Closed(object sender, EventArgs e)
         {
             if (_openChip?.TryGetTarget(out var chip) == true && chip == this) _openChip = null;
+            var point = Mouse.GetPosition(InfoButton);
+            if (Mouse.LeftButton == MouseButtonState.Pressed &&
+                new Rect(new Point(), InfoButton.RenderSize).Contains(point))
+            {
+                _awaitingAnchorMouseDown = true;
+                Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+                {
+                    if (Mouse.LeftButton == MouseButtonState.Released)
+                        _awaitingAnchorMouseDown = false;
+                }));
+            }
         }
         private void Chip_Loaded(object sender, RoutedEventArgs e)
         {

@@ -48,8 +48,22 @@ namespace LenSa.Core.Services.AppConfig
         [JsonPropertyName("conversationMode")]
         public bool ConversationMode { get; set; } = true;
 
+        private bool _useThinking;
+
         [JsonPropertyName("useThinking")]
-        public bool UseThinking { get; set; }
+        public bool UseThinking
+        {
+            get => _useThinking;
+            set
+            {
+                _useThinking = value;
+                HasUseThinking = true;
+            }
+        }
+
+        /// <summary>Distinguishes a missing saved setting from an explicit legacy Off.</summary>
+        [JsonIgnore]
+        public bool HasUseThinking { get; private set; }
 
         // Уровень размышлений minimal|low|medium|high (REQ-007 контракта). Действует при useThinking.
         [JsonPropertyName("reasoningEffort")]

@@ -153,7 +153,6 @@
     <sys:String x:Key="str_CompactNotConfigured">Сжатие контекста не настроено</sys:String>
     <sys:String x:Key="str_CompactDisabled">Сжатие контекста отключено для этого продукта</sys:String>
     <sys:String x:Key="str_CompactUnavailable">Сжатие контекста сейчас недоступно</sys:String>
-    <sys:String x:Key="str_CompactContextHint">Свернуть старую историю диалога в сводку — не дожидаясь автоматического сжатия. Сообщения останутся на месте. Это платный вызов AI.</sys:String>
     <sys:String x:Key="str_ContextCompactedFmt">Контекст сжат: {0:N0} → ~{1:N0} токенов</sys:String>
     <sys:String x:Key="str_ContextCompacted">Контекст сжат</sys:String>
     <sys:String x:Key="str_CompactBelowFloor">Сжимать пока нечего — контекст ещё не набрался.</sys:String>

@@ -119,10 +119,11 @@ namespace LenSa.Core.Chat.Views
                     if (row.LabelKey == "str_MetricIncoming" && Data.CacheSplit is { } split)
                     {
                         body.Children.Add(Progress(split.Fill, "AccentColor"));
+                        var cachePercent = (int)Math.Round(split.Fill * 100, MidpointRounding.AwayFromZero);
                         var cacheLegend = Legend("str_MetricCached", split.CachedText,
-                            (split.Fill * 100).ToString("F0", CultureInfo.CurrentCulture), "AccentColor");
+                            cachePercent.ToString(CultureInfo.CurrentCulture), "AccentColor");
                         var newLegend = Legend("str_MetricNew", split.NewText,
-                            (100 - Math.Round(split.Fill * 100)).ToString("F0", CultureInfo.CurrentCulture), "TertiaryBackground");
+                            (100 - cachePercent).ToString(CultureInfo.CurrentCulture), "TertiaryBackground");
                         var legends = TwoColumns(cacheLegend, newLegend);
                         legends.Margin = new Thickness(0, 0, 0, 3);
                         body.Children.Add(legends);

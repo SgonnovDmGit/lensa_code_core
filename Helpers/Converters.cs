@@ -283,6 +283,7 @@ namespace LenSa.Core.Helpers
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             var pct = value switch { double d => d, int i => i, _ => 0.0 };
+            pct = Math.Round(pct, MidpointRounding.AwayFromZero);
             return pct >= 90 ? "crit" : pct >= 70 ? "warn" : "ok";
         }
 
@@ -365,7 +366,7 @@ namespace LenSa.Core.Helpers
     {
         public static string? ResourceKeyFor(string? token) => token?.Trim().ToLowerInvariant() switch
         {
-            "none" => "str_ReasoningLevelNone",
+            "off" or "none" => "str_ReasoningLevelNone",
             "minimal" => "str_ReasoningLevelMinimal",
             "low" => "str_ReasoningLevelLow",
             "medium" => "str_ReasoningLevelMedium",
@@ -377,7 +378,7 @@ namespace LenSa.Core.Helpers
 
         public static string BrushKeyFor(string? token) => token?.Trim().ToLowerInvariant() switch
         {
-            "none" => "ReasoningOff",
+            "off" or "none" => "ReasoningOff",
             "minimal" => "ReasoningMinimal",
             "low" => "ReasoningLow",
             "medium" => "ReasoningMedium",

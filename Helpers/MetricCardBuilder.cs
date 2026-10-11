@@ -141,7 +141,7 @@ namespace LenSa.Core.Helpers
         private static void AddWindow(List<MetricRow> rows, string key, int? value, CultureInfo culture, bool approximate = false)
         {
             if (value.HasValue)
-                rows.Add(new MetricRow(key, (approximate ? "≈ " : string.Empty) + FormatTokens(value.Value, culture)));
+                rows.Add(new MetricRow(key, (approximate ? "≈" : string.Empty) + FormatTokens(value.Value, culture)));
         }
 
         private static string FormatTokens(int value, CultureInfo culture) =>

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using LenSa.Core.Chat.Models;
@@ -17,9 +18,12 @@ namespace LenSa.Core.Chat.Services
     {
         private static readonly object Sync = new();
         private static Dictionary<string, BoardSnapshot>? _map;
-        private static DateTimeOffset? _legacyFileUpdatedAt;
+        private static Dictionary<string, JsonElement> _unknownRecords = new(StringComparer.Ordinal);
 
-        private static string FilePath =>
+        private static string V2FilePath =>
+            Path.Combine(AppConfigService.ConfigDirectory, "task-boards.v2.json");
+
+        private static string LegacyFilePath =>
             Path.Combine(AppConfigService.ConfigDirectory, "task-boards.json");
 
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -49,6 +53,11 @@ namespace LenSa.Core.Chat.Services
             IReadOnlyList<TaskDto> Tasks,
             string? Title,
             DateTimeOffset UpdatedAt);
+
+        /// <summary>Known snapshots plus raw records this client cannot interpret.</summary>
+        public sealed record ParsedV2(
+            IReadOnlyList<BoardSnapshot> Boards,
+            IReadOnlyDictionary<string, JsonElement> UnknownRecords);
 
         /// <summary>Создать независимую копию снимка из задач интерфейса.</summary>
         public static BoardSnapshot Snapshot(
@@ -130,8 +139,85 @@ namespace LenSa.Core.Chat.Services
             }
         }
 
-        /// <summary>Сериализовать коллекцию снимков в формат task-boards.json.</summary>
-        public static string Serialize(IEnumerable<BoardSnapshot> snapshots)
+        /// <summary>Сериализовать коллекцию снимков в формат task-boards.v2.json.</summary>
+        public static ParsedV2 ParseV2(
+            string json,
+            DateTimeOffset fallbackUpdatedAt,
+            Func<string, string?>? titleResolver = null)
+        {
+            var boards = new List<BoardSnapshot>();
+            var unknown = new Dictionary<string, JsonElement>(StringComparer.Ordinal);
+            if (string.IsNullOrWhiteSpace(json))
+                return new ParsedV2(boards.AsReadOnly(), unknown);
+
+            try
+            {
+                using var document = JsonDocument.Parse(json);
+                if (document.RootElement.ValueKind != JsonValueKind.Object)
+                    return new ParsedV2(boards.AsReadOnly(), unknown);
+
+                foreach (var property in document.RootElement.EnumerateObject())
+                {
+                    try
+                    {
+                        var value = property.Value;
+                        if (value.ValueKind == JsonValueKind.Array)
+                        {
+                            var legacyTasks = DeserializeTasks(value);
+                            if (legacyTasks is null)
+                                unknown[property.Name] = value.Clone();
+                            else
+                                boards.Add(CreateSnapshot(property.Name, legacyTasks,
+                                    titleResolver?.Invoke(property.Name), fallbackUpdatedAt));
+                            continue;
+                        }
+
+                        if (value.ValueKind != JsonValueKind.Object ||
+                            !TryGetProperty(value, "tasks", out var tasksElement) ||
+                            tasksElement.ValueKind != JsonValueKind.Array)
+                        {
+                            unknown[property.Name] = value.Clone();
+                            continue;
+                        }
+
+                        var tasks = DeserializeTasks(tasksElement);
+                        if (tasks is null)
+                        {
+                            unknown[property.Name] = value.Clone();
+                            continue;
+                        }
+
+                        string? title = null;
+                        if (TryGetProperty(value, "title", out var titleElement) &&
+                            titleElement.ValueKind == JsonValueKind.String)
+                            title = titleElement.GetString();
+                        var updatedAt = fallbackUpdatedAt;
+                        if (TryGetProperty(value, "updatedAt", out var dateElement) &&
+                            dateElement.ValueKind == JsonValueKind.String &&
+                            dateElement.TryGetDateTimeOffset(out var storedDate))
+                            updatedAt = storedDate;
+                        if (string.IsNullOrWhiteSpace(title)) title = titleResolver?.Invoke(property.Name);
+                        boards.Add(CreateSnapshot(property.Name, tasks, title, updatedAt));
+                    }
+                    catch
+                    {
+                        unknown[property.Name] = property.Value.Clone();
+                    }
+                }
+            }
+            catch
+            {
+                // An invalid root has no safely recoverable per-record structure.
+            }
+
+            return new ParsedV2(boards.AsReadOnly(), unknown);
+        }
+
+        public static string Serialize(IEnumerable<BoardSnapshot> snapshots) => SerializeV2(snapshots, null);
+
+        public static string SerializeV2(
+            IEnumerable<BoardSnapshot> snapshots,
+            IReadOnlyDictionary<string, JsonElement>? unknownRecords)
         {
             ArgumentNullException.ThrowIfNull(snapshots);
             var map = new Dictionary<string, BoardSnapshot>(StringComparer.Ordinal);
@@ -141,7 +227,33 @@ namespace LenSa.Core.Chat.Services
                 map[snapshot.SessionId] = CreateSnapshot(
                     snapshot.SessionId, snapshot.Tasks, snapshot.Title, snapshot.UpdatedAt);
             }
-            return JsonSerializer.Serialize(map, JsonOptions);
+
+            using var stream = new MemoryStream();
+            using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
+            {
+                writer.WriteStartObject();
+                foreach (var snapshot in map.Values)
+                {
+                    writer.WritePropertyName(snapshot.SessionId);
+                    JsonSerializer.Serialize(writer, new
+                    {
+                        tasks = snapshot.Tasks,
+                        title = snapshot.Title,
+                        updatedAt = snapshot.UpdatedAt
+                    }, JsonOptions);
+                }
+                if (unknownRecords is not null)
+                {
+                    foreach (var (sessionId, raw) in unknownRecords)
+                    {
+                        if (map.ContainsKey(sessionId)) continue;
+                        writer.WritePropertyName(sessionId);
+                        raw.WriteTo(writer);
+                    }
+                }
+                writer.WriteEndObject();
+            }
+            return Encoding.UTF8.GetString(stream.ToArray());
         }
 
         /// <summary>Снимки всех досок; legacy-заголовок разрешается продуктовым callback.</summary>
@@ -224,12 +336,23 @@ namespace LenSa.Core.Chat.Services
             if (_map != null) return _map;
             try
             {
-                if (File.Exists(FilePath))
+                if (File.Exists(V2FilePath))
                 {
-                    var info = new FileInfo(FilePath);
-                    _legacyFileUpdatedAt = new DateTimeOffset(info.LastWriteTimeUtc, TimeSpan.Zero);
-                    _map = Parse(File.ReadAllText(FilePath), _legacyFileUpdatedAt.Value)
-                        .ToDictionary(snapshot => snapshot.SessionId, StringComparer.Ordinal);
+                    var info = new FileInfo(V2FilePath);
+                    var fallbackUpdatedAt = new DateTimeOffset(info.LastWriteTimeUtc, TimeSpan.Zero);
+                    var parsed = ParseV2(File.ReadAllText(V2FilePath), fallbackUpdatedAt);
+                    _unknownRecords = parsed.UnknownRecords.ToDictionary(
+                        pair => pair.Key, pair => pair.Value.Clone(), StringComparer.Ordinal);
+                    _map = parsed.Boards.ToDictionary(snapshot => snapshot.SessionId, StringComparer.Ordinal);
+                }
+                else if (File.Exists(LegacyFilePath))
+                {
+                    var info = new FileInfo(LegacyFilePath);
+                    var legacyUpdatedAt = new DateTimeOffset(info.LastWriteTimeUtc, TimeSpan.Zero);
+                    var parsed = ParseV2(File.ReadAllText(LegacyFilePath), legacyUpdatedAt);
+                    _unknownRecords = parsed.UnknownRecords.ToDictionary(
+                        pair => pair.Key, pair => pair.Value.Clone(), StringComparer.Ordinal);
+                    _map = parsed.Boards.ToDictionary(snapshot => snapshot.SessionId, StringComparer.Ordinal);
                 }
             }
             catch
@@ -243,10 +366,26 @@ namespace LenSa.Core.Chat.Services
         {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(FilePath)!);
-                File.WriteAllText(FilePath, Serialize(map.Values));
+                WriteAtomically(V2FilePath, SerializeV2(map.Values, _unknownRecords));
             }
             catch { /* доска — вспомогательные данные, сбой записи не роняет чат */ }
+        }
+
+        private static void WriteAtomically(string path, string contents)
+        {
+            var directory = Path.GetDirectoryName(path)!;
+            Directory.CreateDirectory(directory);
+            var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(path)}.{Guid.NewGuid():N}.tmp");
+            try
+            {
+                File.WriteAllText(temporaryPath, contents, new UTF8Encoding(false));
+                if (File.Exists(path)) File.Replace(temporaryPath, path, null);
+                else File.Move(temporaryPath, path);
+            }
+            finally
+            {
+                if (File.Exists(temporaryPath)) File.Delete(temporaryPath);
+            }
         }
 
         private static IReadOnlyList<TaskDto>? DeserializeTasks(JsonElement element) =>

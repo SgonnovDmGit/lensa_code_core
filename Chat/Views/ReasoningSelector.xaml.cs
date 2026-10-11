@@ -86,16 +86,17 @@ namespace LenSa.Core.Chat.Views
             _updating = true;
             try
             {
-                var index = _levels.ToList().IndexOf(SelectedEffort);
+                var displayedEffort = EffectiveEffort();
+                var index = displayedEffort is null ? -1 : _levels.ToList().IndexOf(displayedEffort);
                 LevelsSlider.Value = Math.Max(0, index);
-                SetLabel(SelectedLabel, SelectedEffort);
-                SelectedLabel.SetResourceReference(TextBlock.ForegroundProperty, ReasoningNameConverter.BrushKeyFor(SelectedEffort));
+                SetLabel(SelectedLabel, displayedEffort);
+                SelectedLabel.SetResourceReference(TextBlock.ForegroundProperty, ReasoningNameConverter.BrushKeyFor(displayedEffort));
                 LevelsSlider.ApplyTemplate();
                 if (LevelsSlider.Template.FindName("PART_Track", LevelsSlider) is Track track)
-                    track.Thumb?.SetResourceReference(Control.BackgroundProperty, ReasoningNameConverter.BrushKeyFor(SelectedEffort));
+                    track.Thumb?.SetResourceReference(Control.BackgroundProperty, ReasoningNameConverter.BrushKeyFor(displayedEffort));
                 foreach (var button in _buttons)
                 {
-                    var selected = string.Equals(button.Tag as string, SelectedEffort, StringComparison.Ordinal);
+                    var selected = string.Equals(button.Tag as string, displayedEffort, StringComparison.Ordinal);
                     if (selected)
                     {
                         button.SetResourceReference(Control.BackgroundProperty, "HoverBackground");
@@ -110,6 +111,13 @@ namespace LenSa.Core.Chat.Views
                 }
             }
             finally { _updating = false; }
+        }
+
+        private string? EffectiveEffort()
+        {
+            if (_levels.Count == 0) return null;
+            if (_levels.Contains(SelectedEffort, StringComparer.Ordinal)) return SelectedEffort;
+            return ReasoningLevelPolicy.Coerce(SelectedEffort, Array.Empty<string>(), _levels);
         }
 
         private static void SetLabel(TextBlock label, string? token)
