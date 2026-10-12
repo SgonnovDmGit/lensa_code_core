@@ -107,6 +107,8 @@ namespace LenSa.Core.Services.AppConfig
 
         [JsonPropertyName("changeMarkersEnabled")]
         public bool ChangeMarkersEnabled { get; set; } = true;
+        [JsonPropertyName("sandboxChangeMarkersEnabled")]
+        public bool SandboxChangeMarkersEnabled { get; set; } = true;
 
         [JsonPropertyName("currentTaskId")]
         public string CurrentTaskId { get; set; } = string.Empty;
