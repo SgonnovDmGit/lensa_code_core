@@ -430,9 +430,10 @@ namespace LenSa.Core.Services.Api
             {
                 await SendAsync<SessionActionResponse>(request, cancellationToken);
             }
-            catch (ApiException ex) when (ex.ErrorCode == "SESSION_NOT_FOUND" || ex.ErrorCode == "HTTP_404")
+            catch (ApiException ex) when (ex.ErrorCode == "SESSION_NOT_FOUND")
             {
-                // A 404 is also returned without an error envelope by some compatible servers.
+                // Only the session-specific contract error proves that the desired state
+                // (session absent) has already been reached. A bare/proxy HTTP 404 is not enough.
             }
         }
 
