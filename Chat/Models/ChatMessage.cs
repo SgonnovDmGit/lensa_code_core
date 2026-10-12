@@ -36,6 +36,11 @@ namespace LenSa.Core.Chat.Models
         private string _modelName = string.Empty;
         private string _providerName = string.Empty;
         private bool _isThinking;
+        private ChatTurnPiece _turnPiece;
+        private bool _showTurnFooter;
+        private bool _isHistoryPageError;
+        private bool _isTurnStartMissing;
+        private bool _canCollectTurnText;
         private bool _hasCodeChanges;
         private List<ToolUseDTO>? _toolUses;
         private List<ToolResultItem>? _toolResults;
@@ -61,6 +66,39 @@ namespace LenSa.Core.Chat.Models
         private ChainStats? _callMetrics;
 
         public string Role { get; set; } = string.Empty;
+
+        public ChatTurnPiece TurnPiece
+        {
+            get => _turnPiece;
+            set => SetProperty(ref _turnPiece, value);
+        }
+
+        public bool ShowTurnFooter
+        {
+            get => _showTurnFooter;
+            set => SetProperty(ref _showTurnFooter, value);
+        }
+
+        /// <summary>True only for a leading history-page error notice outside the loaded transcript.</summary>
+        public bool IsHistoryPageError
+        {
+            get => _isHistoryPageError;
+            set => SetProperty(ref _isHistoryPageError, value);
+        }
+
+        /// <summary>True when this assistant turn crosses the loaded history's left edge.</summary>
+        public bool IsTurnStartMissing
+        {
+            get => _isTurnStartMissing;
+            set => SetProperty(ref _isTurnStartMissing, value);
+        }
+
+        /// <summary>True when this complete turn has non-thinking, non-empty content.</summary>
+        public bool CanCollectTurnText
+        {
+            get => _canCollectTurnText;
+            set => SetProperty(ref _canCollectTurnText, value);
+        }
 
         public string Content
         {

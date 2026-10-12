@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,6 +32,8 @@ namespace LenSa.Core.Chat.ViewModels
         private bool _isBusy;
         private bool _hasOlderMessages;
         private bool _isLoadingOlderMessages;
+        private readonly HashSet<ChatMessage> _turnLayoutObservedMessages = new();
+        private bool _isAssigningTurnLayout;
 
         // CTS активного SendMessageAsync — заменяется на новый в каждом заходе,
         // используется InterruptCommand для отмены submit+poll (ANNOUNCE-007).
@@ -101,6 +105,7 @@ namespace LenSa.Core.Chat.ViewModels
             private set
             {
                 if (!SetProperty(ref _hasOlderMessages, value)) return;
+                RefreshTurnLayout();
                 System.Windows.Input.CommandManager.InvalidateRequerySuggested();
             }
         }
@@ -170,6 +175,7 @@ namespace LenSa.Core.Chat.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     OnBusyChanged(value);
+                    RefreshTurnLayout();
                     // WPF переопрашивает CanExecute лениво (по input-событиям) —
                     // без форса кнопки на !IsBusy остаются серыми до движения мыши
                     // (смок 07.07: «+» после выбора диалога временно неактивна).
@@ -238,6 +244,9 @@ namespace LenSa.Core.Chat.ViewModels
         {
             Api = api ?? throw new ArgumentNullException(nameof(api));
 
+            Messages.CollectionChanged += OnMessagesCollectionChanged;
+            RefreshTurnLayout();
+
             // Лимит длины гасит и кнопку, и Enter разом: композер жмёт Enter через
             // SendButton.Command.CanExecute, так что второй проверки в code-behind не нужно.
             SendMessageCommand = new RelayCommand(
@@ -279,6 +288,46 @@ namespace LenSa.Core.Chat.ViewModels
             });
         }
 
+        private void OnMessagesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            // Reconcile for Add, Remove, Replace, Move, and Reset. Removed rows release this VM handler.
+            var current = new HashSet<ChatMessage>(Messages);
+            foreach (var removed in _turnLayoutObservedMessages.Where(message => !current.Contains(message)).ToArray())
+            {
+                removed.PropertyChanged -= OnTurnLayoutMessagePropertyChanged;
+                _turnLayoutObservedMessages.Remove(removed);
+            }
+
+            foreach (var added in current)
+            {
+                if (_turnLayoutObservedMessages.Add(added))
+                    added.PropertyChanged += OnTurnLayoutMessagePropertyChanged;
+            }
+
+            RefreshTurnLayout();
+        }
+
+        private void OnTurnLayoutMessagePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (_isAssigningTurnLayout) return;
+            if (e.PropertyName is not (nameof(ChatMessage.Content) or nameof(ChatMessage.IsThinking) or
+                nameof(ChatMessage.IsHistoryPageError))) return;
+            RefreshTurnLayout();
+        }
+
+        private void RefreshTurnLayout()
+        {
+            if (_isAssigningTurnLayout) return;
+            _isAssigningTurnLayout = true;
+            try
+            {
+                ChatTurnLayout.Assign(Messages, IsBusy, HasOlderMessages);
+            }
+            finally
+            {
+                _isAssigningTurnLayout = false;
+            }
+        }
         // === Доска задач (T-000080/T-000081, REQ-021) =========================
 
         private const string TaskBoardToolName = "task_board_update";

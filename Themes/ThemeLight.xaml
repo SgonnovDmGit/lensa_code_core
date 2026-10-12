@@ -32,6 +32,8 @@
     <!-- Chat & Diff -->
     <SolidColorBrush x:Key="UserBubbleBackground" Color="#DDF5EB"/>
     <SolidColorBrush x:Key="AssistantBubbleBackground" Color="#F3F7F5"/>
+    <SolidColorBrush x:Key="TurnFrameBackground" Color="#FAFCFB"/>
+    <SolidColorBrush x:Key="TurnFrameBorder" Color="#D5DDD9"/>
     <SolidColorBrush x:Key="DiffAddedBackground" Color="#E3F6EA"/>
     <SolidColorBrush x:Key="DiffRemovedBackground" Color="#FBE9E5"/>
     <SolidColorBrush x:Key="StatusBarBackground" Color="#DFE8E3"/>

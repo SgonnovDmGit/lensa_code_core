@@ -73,7 +73,45 @@
 
         <!-- ================= ASSISTANT ================= -->
         <DataTemplate x:Key="AssistantTemplate">
-            <Grid Margin="0,8,60,8">
+            <Border x:Name="TurnFrame" Background="{DynamicResource TurnFrameBackground}"
+                    BorderBrush="{DynamicResource TurnFrameBorder}">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{DynamicResource TurnFrameBackground}"/>
+                        <Setter Property="BorderBrush" Value="{DynamicResource TurnFrameBorder}"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="CornerRadius" Value="0"/>
+                        <Setter Property="Padding" Value="0"/>
+                        <Setter Property="Margin" Value="0,8,60,8"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding TurnPiece}" Value="Single">
+                                <Setter Property="BorderThickness" Value="1"/>
+                                <Setter Property="CornerRadius" Value="12"/>
+                                <Setter Property="Padding" Value="8"/>
+                                <Setter Property="Margin" Value="0,8,60,8"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding TurnPiece}" Value="First">
+                                <Setter Property="BorderThickness" Value="1,1,1,0"/>
+                                <Setter Property="CornerRadius" Value="12,12,0,0"/>
+                                <Setter Property="Padding" Value="8,8,8,3"/>
+                                <Setter Property="Margin" Value="0,8,60,0"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding TurnPiece}" Value="Middle">
+                                <Setter Property="BorderThickness" Value="1,0,1,0"/>
+                                <Setter Property="CornerRadius" Value="0"/>
+                                <Setter Property="Padding" Value="8,3,8,3"/>
+                                <Setter Property="Margin" Value="0,0,60,0"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding TurnPiece}" Value="Last">
+                                <Setter Property="BorderThickness" Value="1,0,1,1"/>
+                                <Setter Property="CornerRadius" Value="0,0,12,12"/>
+                                <Setter Property="Padding" Value="8,3,8,8"/>
+                                <Setter Property="Margin" Value="0,0,60,8"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
                 <!-- ЯНТАРНЫЙ THINK-ЧИП (вариант A: пульс-точка) — пока ход в полёте -->
                 <Border x:Name="ThinkChip"
                         HorizontalAlignment="Left"
@@ -354,7 +392,8 @@
                     <views:MetricChip Message="{Binding}" HorizontalAlignment="Right" Margin="0,6,0,0"
                                       Visibility="{Binding HasChain, Converter={StaticResource BoolToVis}}"/>
                 </StackPanel>
-            </Grid>
+                </Grid>
+            </Border>
         </DataTemplate>
 
         <!-- ================= TOOL USE (standalone) ================= -->
