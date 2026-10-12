@@ -311,7 +311,7 @@ namespace LenSa.Core.Chat.ViewModels
         {
             if (_isAssigningTurnLayout) return;
             if (e.PropertyName is not (nameof(ChatMessage.Content) or nameof(ChatMessage.IsThinking) or
-                nameof(ChatMessage.IsHistoryPageError))) return;
+                nameof(ChatMessage.IsHistoryPageError) or nameof(ChatMessage.IsOutsideTurn))) return;
             RefreshTurnLayout();
         }
 
@@ -889,16 +889,26 @@ namespace LenSa.Core.Chat.ViewModels
             }
             catch (ApiException ex)
             {
-                await OnApiExceptionAsync(ex);
+                var messageCount = Messages.Count;
+                try { await OnApiExceptionAsync(ex); }
+                finally { MarkOutsideTurnMessages(messageCount); }
             }
             catch (Exception ex)
             {
-                await OnUnexpectedExceptionAsync(ex);
+                var messageCount = Messages.Count;
+                try { await OnUnexpectedExceptionAsync(ex); }
+                finally { MarkOutsideTurnMessages(messageCount); }
             }
             finally
             {
                 IsBusy = false;
             }
+        }
+
+        private void MarkOutsideTurnMessages(int firstNewMessageIndex)
+        {
+            for (var index = Math.Max(0, firstNewMessageIndex); index < Messages.Count; index++)
+                Messages[index].IsOutsideTurn = true;
         }
 
         /// <summary>

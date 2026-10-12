@@ -46,6 +46,11 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Opacity" Value="0.45"/>
+                </Trigger>
+            </Style.Triggers>
         </Style>
 
         <Style x:Key="TurnActionButton" TargetType="Button" BasedOn="{StaticResource MsgActionButton}">
@@ -96,8 +101,7 @@
 
         <!-- ================= ASSISTANT ================= -->
         <DataTemplate x:Key="AssistantTemplate">
-            <Border x:Name="TurnFrame" Background="{DynamicResource TurnFrameBackground}"
-                    BorderBrush="{DynamicResource TurnFrameBorder}">
+            <Border x:Name="TurnFrame">
                 <Border.Style>
                     <Style TargetType="Border">
                         <Setter Property="Background" Value="{DynamicResource TurnFrameBackground}"/>
@@ -107,6 +111,10 @@
                         <Setter Property="Padding" Value="0"/>
                         <Setter Property="Margin" Value="0,8,60,8"/>
                         <Style.Triggers>
+                            <DataTrigger Binding="{Binding TurnPiece}" Value="None">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="BorderBrush" Value="Transparent"/>
+                            </DataTrigger>
                             <DataTrigger Binding="{Binding TurnPiece}" Value="Single">
                                 <Setter Property="BorderThickness" Value="1"/>
                                 <Setter Property="CornerRadius" Value="12"/>

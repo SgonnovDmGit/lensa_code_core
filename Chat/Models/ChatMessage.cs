@@ -39,6 +39,7 @@ namespace LenSa.Core.Chat.Models
         private ChatTurnPiece _turnPiece;
         private bool _showTurnFooter;
         private bool _isHistoryPageError;
+        private bool _isOutsideTurn;
         private bool _isTurnStartMissing;
         private bool _canCollectTurnText;
         private bool _hasCodeChanges;
@@ -84,6 +85,13 @@ namespace LenSa.Core.Chat.Models
         {
             get => _isHistoryPageError;
             set => SetProperty(ref _isHistoryPageError, value);
+        }
+
+        /// <summary>True when this assistant message was added by an operation outside an AI turn.</summary>
+        public bool IsOutsideTurn
+        {
+            get => _isOutsideTurn;
+            set => SetProperty(ref _isOutsideTurn, value);
         }
 
         /// <summary>True when this assistant turn crosses the loaded history's left edge.</summary>

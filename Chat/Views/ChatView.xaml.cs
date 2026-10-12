@@ -2,6 +2,7 @@ using System;
 using System.Collections.Specialized;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
@@ -75,6 +76,20 @@ namespace LenSa.Core.Chat.Views
                     if (position.Y + item.ActualHeight <= 0 || position.Y >= ThreadScroll.ViewportHeight)
                         continue;
 
+                    var textAnchor = FindFirstVisibleText(item);
+                    if (textAnchor != null)
+                    {
+                        try
+                        {
+                            y = FirstTextPositionInThread(textAnchor);
+                            return textAnchor;
+                        }
+                        catch (InvalidOperationException)
+                        {
+                            // Use the stable row as a fallback while a text surface is retemplating.
+                        }
+                    }
+
                     y = position.Y;
                     return item;
                 }
@@ -94,7 +109,9 @@ namespace LenSa.Core.Chat.Views
             {
                 try
                 {
-                    var newY = anchor.TransformToAncestor(ThreadScroll).Transform(new Point(0, 0)).Y;
+                    var newY = anchor is RichTextBox text
+                        ? FirstTextPositionInThread(text)
+                        : anchor.TransformToAncestor(ThreadScroll).Transform(new Point(0, 0)).Y;
                     ThreadScroll.ScrollToVerticalOffset(ThreadScroll.VerticalOffset + newY - _prependAnchorY);
                 }
                 catch (InvalidOperationException)
@@ -114,6 +131,28 @@ namespace LenSa.Core.Chat.Views
         private void RestoreByExtentDelta() =>
             ThreadScroll.ScrollToVerticalOffset(
                 ThreadScroll.VerticalOffset + ThreadScroll.ExtentHeight - _prependExtentHeight);
+
+        private static RichTextBox? FindFirstVisibleText(DependencyObject root)
+        {
+            if (root is RichTextBox text && text.IsVisible &&
+                !string.IsNullOrWhiteSpace(new TextRange(text.Document.ContentStart, text.Document.ContentEnd).Text))
+                return text;
+
+            for (var index = 0; index < VisualTreeHelper.GetChildrenCount(root); index++)
+            {
+                var found = FindFirstVisibleText(VisualTreeHelper.GetChild(root, index));
+                if (found != null) return found;
+            }
+
+            return null;
+        }
+
+        private double FirstTextPositionInThread(RichTextBox text)
+        {
+            var firstCharacter = text.Document.ContentStart.GetCharacterRect(LogicalDirection.Forward);
+            return text.TransformToAncestor(ThreadScroll)
+                .Transform(new Point(firstCharacter.X, firstCharacter.Y)).Y;
+        }
         // --- Кнопки-иконки под сообщением ассистента (T-000074) --------------
 
         private void CopyMessage_Click(object sender, RoutedEventArgs e)

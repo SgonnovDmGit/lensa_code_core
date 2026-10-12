@@ -34,21 +34,23 @@ namespace LenSa.Core.Chat.Models
             }
 
             var openTurnStart = hasOlderMessages && firstHistoryRow < count &&
-                                messages[firstHistoryRow].Role == MessageRoles.Assistant
+                                messages[firstHistoryRow].Role == MessageRoles.Assistant &&
+                                !messages[firstHistoryRow].IsOutsideTurn
                 ? firstHistoryRow
                 : -1;
 
             var runStart = 0;
             while (runStart < count)
             {
-                if (messages[runStart].Role != MessageRoles.Assistant)
+                if (messages[runStart].Role != MessageRoles.Assistant || messages[runStart].IsOutsideTurn)
                 {
                     runStart++;
                     continue;
                 }
 
                 var runEnd = runStart;
-                while (runEnd + 1 < count && messages[runEnd + 1].Role == MessageRoles.Assistant)
+                while (runEnd + 1 < count && messages[runEnd + 1].Role == MessageRoles.Assistant &&
+                       !messages[runEnd + 1].IsOutsideTurn)
                     runEnd++;
 
                 var runIsOpen = runStart == openTurnStart;
@@ -103,7 +105,7 @@ namespace LenSa.Core.Chat.Models
         {
             if (messages is null) throw new ArgumentNullException(nameof(messages));
             if (member is null) throw new ArgumentNullException(nameof(member));
-            if (member.Role != MessageRoles.Assistant ||
+            if (member.Role != MessageRoles.Assistant || member.IsOutsideTurn ||
                 member.IsTurnStartMissing ||
                 !member.CanCollectTurnText)
                 return string.Empty;
@@ -118,10 +120,12 @@ namespace LenSa.Core.Chat.Models
             if (memberIndex < 0) return string.Empty;
 
             var start = memberIndex;
-            while (start > 0 && messages[start - 1].Role == MessageRoles.Assistant)
+            while (start > 0 && messages[start - 1].Role == MessageRoles.Assistant &&
+                   !messages[start - 1].IsOutsideTurn)
                 start--;
             var end = memberIndex;
-            while (end + 1 < messages.Count && messages[end + 1].Role == MessageRoles.Assistant)
+            while (end + 1 < messages.Count && messages[end + 1].Role == MessageRoles.Assistant &&
+                   !messages[end + 1].IsOutsideTurn)
                 end++;
 
             if (messages[start].IsTurnStartMissing) return string.Empty;
