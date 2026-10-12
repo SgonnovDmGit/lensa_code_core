@@ -410,6 +410,65 @@ namespace LenSa.Core.Services.Api
             return await SendAsync<SessionMessagesResponse>(request);
         }
 
+        /// <summary>Rename a session; returns the title applied by the server.</summary>
+        public async Task<SessionRenameResponse> RenameSessionAsync(
+            string sessionId, string title, CancellationToken cancellationToken = default)
+        {
+            var path = $"/v1/api/sessions/{Uri.EscapeDataString(sessionId)}";
+            using var request = CreateRequest(HttpMethod.Patch, path);
+            var json = JsonSerializer.Serialize(new { title }, BodyJson);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            return await SendAsync<SessionRenameResponse>(request, cancellationToken);
+        }
+
+        /// <summary>Delete a session. A missing session is already in the desired state.</summary>
+        public async Task DeleteSessionAsync(string sessionId, CancellationToken cancellationToken = default)
+        {
+            var path = $"/v1/api/sessions/{Uri.EscapeDataString(sessionId)}";
+            using var request = CreateRequest(HttpMethod.Delete, path);
+            try
+            {
+                await SendAsync<SessionActionResponse>(request, cancellationToken);
+            }
+            catch (ApiException ex) when (ex.ErrorCode == "SESSION_NOT_FOUND" || ex.ErrorCode == "HTTP_404")
+            {
+                // A 404 is also returned without an error envelope by some compatible servers.
+            }
+        }
+
+        public async Task<SessionSummaryResponse> GetSessionSummaryAsync(
+            string sessionId, CancellationToken cancellationToken = default)
+        {
+            var path = $"/v1/api/sessions/{Uri.EscapeDataString(sessionId)}/summary";
+            using var request = CreateRequest(HttpMethod.Get, path);
+            return await SendAsync<SessionSummaryResponse>(request, cancellationToken);
+        }
+
+        public async Task<string> GetSessionExportNameAsync(
+            string sessionId, CancellationToken cancellationToken = default)
+        {
+            var path = $"/v1/api/sessions/{Uri.EscapeDataString(sessionId)}/export/name";
+            using var request = CreateRequest(HttpMethod.Get, path);
+            AddUserTimezone(request);
+            var response = await SendAsync<SessionExportNameResponse>(request, cancellationToken);
+            return response.FileName;
+        }
+
+        public async Task<string> GetSessionExportAsync(
+            string sessionId, CancellationToken cancellationToken = default)
+        {
+            var path = $"/v1/api/sessions/{Uri.EscapeDataString(sessionId)}/export";
+            using var request = CreateRequest(HttpMethod.Get, path);
+            AddUserTimezone(request);
+            return await SendTextAsync(request, cancellationToken);
+        }
+
+        private static void AddUserTimezone(HttpRequestMessage request)
+        {
+            var offsetMinutes = (int)TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).TotalMinutes;
+            request.Headers.TryAddWithoutValidation("X-User-Timezone", offsetMinutes.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        }
+
         /// <summary>
         /// Ручное сжатие контекста диалога (POST /v1/api/sessions/{id}/compact, T-000133).
         /// Тело опционально (пустое = модель компактизатора по умолчанию) — не шлём.
@@ -449,7 +508,26 @@ namespace LenSa.Core.Services.Api
             return request;
         }
 
-        private async Task<T> SendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default)
+        private Task<T> SendAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken = default)
+        {
+            return SendWithResponseAsync(request, body =>
+            {
+                var result = JsonSerializer.Deserialize<T>(body);
+                if (result == null)
+                    throw new ApiException("PARSE_ERROR", "Failed to parse response");
+                return result;
+            }, cancellationToken);
+        }
+
+        private Task<string> SendTextAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return SendWithResponseAsync(request, body => body, cancellationToken);
+        }
+
+        private async Task<T> SendWithResponseAsync<T>(
+            HttpRequestMessage request,
+            Func<string, T> parseSuccess,
+            CancellationToken cancellationToken)
         {
             HttpResponseMessage response;
             try
@@ -490,11 +568,7 @@ namespace LenSa.Core.Services.Api
                         response.ReasonPhrase ?? "Unknown error");
                 }
 
-                var result = JsonSerializer.Deserialize<T>(body);
-                if (result == null)
-                    throw new ApiException("PARSE_ERROR", "Failed to parse response");
-
-                return result;
+                return parseSuccess(body);
             }
         }
     }

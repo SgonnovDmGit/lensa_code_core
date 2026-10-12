@@ -993,6 +993,128 @@ namespace LenSa.Core.Services.Api
         public ManualCompactionDto? ManualCompaction { get; set; }
     }
 
+    // --- Session actions and properties (T-000203) ---
+
+    public class SessionRenameResponse
+    {
+        [JsonPropertyName("serviceInfo")]
+        public ServiceInfo ServiceInfo { get; set; } = new();
+
+        [JsonPropertyName("title")]
+        public string Title { get; set; } = string.Empty;
+    }
+
+    public class SessionActionResponse
+    {
+        [JsonPropertyName("serviceInfo")]
+        public ServiceInfo ServiceInfo { get; set; } = new();
+    }
+
+    public class SessionSummaryResponse
+    {
+        [JsonPropertyName("serviceInfo")]
+        public ServiceInfo ServiceInfo { get; set; } = new();
+
+        [JsonPropertyName("session")]
+        public SessionInfoDto? Session { get; set; }
+
+        [JsonPropertyName("summary")]
+        public SessionSummary Summary { get; set; } = new();
+    }
+
+    public class SessionSummary
+    {
+        [JsonPropertyName("turnsCount")]
+        public int TurnsCount { get; set; }
+
+        [JsonPropertyName("promptTokens")]
+        public int? PromptTokens { get; set; }
+
+        [JsonPropertyName("completionTokens")]
+        public int? CompletionTokens { get; set; }
+
+        [JsonPropertyName("totalTokens")]
+        public int? TotalTokens { get; set; }
+
+        [JsonPropertyName("cachedTokens")]
+        public int? CachedTokens { get; set; }
+
+        [JsonPropertyName("cacheWriteTokens")]
+        public int? CacheWriteTokens { get; set; }
+
+        [JsonPropertyName("costCoins")]
+        public decimal? CostCoins { get; set; }
+
+        [JsonPropertyName("costUsd")]
+        public decimal? CostUsd { get; set; }
+
+        [JsonPropertyName("costRub")]
+        public decimal? CostRub { get; set; }
+
+        [JsonPropertyName("genMs")]
+        public long? GenMs { get; set; }
+
+        [JsonPropertyName("tokensPerSec")]
+        public double? TokensPerSec { get; set; }
+
+        [JsonPropertyName("modelsUsed")]
+        public string[]? ModelsUsed { get; set; }
+
+        [JsonPropertyName("byModel")]
+        public SessionModelSummary[]? ByModel { get; set; }
+    }
+
+    public class SessionModelSummary
+    {
+        [JsonPropertyName("model")]
+        public string Model { get; set; } = string.Empty;
+
+        [JsonPropertyName("modelDisplayName")]
+        public string ModelDisplayName { get; set; } = string.Empty;
+
+        [JsonPropertyName("turnsCount")]
+        public int TurnsCount { get; set; }
+
+        [JsonPropertyName("promptTokens")]
+        public int? PromptTokens { get; set; }
+
+        [JsonPropertyName("completionTokens")]
+        public int? CompletionTokens { get; set; }
+
+        [JsonPropertyName("totalTokens")]
+        public int? TotalTokens { get; set; }
+
+        [JsonPropertyName("cachedTokens")]
+        public int? CachedTokens { get; set; }
+
+        [JsonPropertyName("cacheWriteTokens")]
+        public int? CacheWriteTokens { get; set; }
+
+        [JsonPropertyName("costCoins")]
+        public decimal? CostCoins { get; set; }
+
+        [JsonPropertyName("costUsd")]
+        public decimal? CostUsd { get; set; }
+
+        [JsonPropertyName("costRub")]
+        public decimal? CostRub { get; set; }
+
+        [JsonPropertyName("genMs")]
+        public long? GenMs { get; set; }
+
+        [JsonPropertyName("tokensPerSec")]
+        public double? TokensPerSec { get; set; }
+    }
+
+    public class SessionExportNameResponse
+    {
+        [JsonPropertyName("serviceInfo")]
+        public ServiceInfo ServiceInfo { get; set; } = new();
+
+        [JsonPropertyName("fileName")]
+        public string FileName { get; set; } = string.Empty;
+    }
+
     /// <summary>
     /// Ответ POST /v1/api/sessions/{id}/compact (T-000133): ручное сжатие контекста —
     /// старая история сворачивается в rolling-summary. Неразрушающе: сами сообщения
