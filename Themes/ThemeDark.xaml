@@ -36,8 +36,6 @@
     <SolidColorBrush x:Key="TurnFrameBorder" Color="#2A3642"/>
     <SolidColorBrush x:Key="DiffAddedBackground" Color="#16301F"/>
     <SolidColorBrush x:Key="DiffRemovedBackground" Color="#33201D"/>
-    <SolidColorBrush x:Key="StatusBarBackground" Color="#0B1015"/>
-    <SolidColorBrush x:Key="StatusBarForeground" Color="#8B98A5"/>
     <SolidColorBrush x:Key="TitleBarBackground" Color="#0E1319"/>
     <SolidColorBrush x:Key="TitleBarForeground" Color="#E6EDF3"/>
 
