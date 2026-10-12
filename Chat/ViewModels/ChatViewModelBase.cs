@@ -186,15 +186,21 @@ namespace LenSa.Core.Chat.ViewModels
             get => _sessionId;
             protected set
             {
-                var previous = _sessionId;
                 if (!SetProperty(ref _sessionId, value)) return;
                 System.Windows.Input.CommandManager.InvalidateRequerySuggested();
-
-                // Доску завели до первого сообщения (сессии ещё не было) — сервер выдал id,
-                // переносим черновик под него, иначе он потерялся бы при перезапуске.
-                if (string.IsNullOrEmpty(previous) && !string.IsNullOrEmpty(value) && TaskBoard.Count > 0)
-                    PersistTaskBoard();
             }
+        }
+
+        /// <summary>
+        /// Принять идентификатор новой сессии, выданный сервером. Черновик доски переносится
+        /// только при первом таком id, чтобы обычное открытие существующего диалога не перезаписывало его доску.
+        /// </summary>
+        protected void AdoptServerSessionId(string sessionId)
+        {
+            var previous = SessionId;
+            SessionId = sessionId;
+            if (string.IsNullOrEmpty(previous) && !string.IsNullOrEmpty(sessionId) && TaskBoard.Count > 0)
+                PersistTaskBoard();
         }
 
         /// <summary>Cancellation token for the active user send, or None for legacy/external calls.</summary>
@@ -1082,7 +1088,7 @@ namespace LenSa.Core.Chat.ViewModels
                 cancellationToken.ThrowIfCancellationRequested();
                 var retry = await Api.PostToolResultsAsync(SessionId, results, AssistMode, ClientTools, cancellationToken);
                 if (!string.IsNullOrEmpty(retry.SessionId))
-                    SessionId = retry.SessionId;
+                    AdoptServerSessionId(retry.SessionId);
 
                 EndToolContinuation();
                 cancellationToken.ThrowIfCancellationRequested();
@@ -1249,7 +1255,7 @@ namespace LenSa.Core.Chat.ViewModels
                 cts.Token.ThrowIfCancellationRequested();
 
                 if (!string.IsNullOrEmpty(response.SessionId))
-                    SessionId = response.SessionId;
+                    AdoptServerSessionId(response.SessionId);
 
                 await HandleChatResponseAsync(response);
             }
@@ -1548,8 +1554,7 @@ namespace LenSa.Core.Chat.ViewModels
             SetHasOlderMessages(false);
             SessionId = string.Empty;
             _boardCarriedOver = carried;
-            // Доску НЕ чистим: она уляжется под новый sessionId, как только сервер его выдаст
-            // (см. сеттер SessionId — там уже есть перенос черновика).
+            // Доску не чистим: она уляжется под новый sessionId, когда его выдаст сервер.
         }
 
         // Доска переехала, но модель ещё не знает — врезка уйдёт в первое сообщение.
