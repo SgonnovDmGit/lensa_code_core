@@ -73,6 +73,7 @@
     <!-- Message actions -->
     <sys:String x:Key="str_Chat_ActionCopy">Copy</sys:String>
     <sys:String x:Key="str_Chat_ActionQuote">Quote</sys:String>
+    <sys:String x:Key="str_Chat_TurnStartRequired">Load the start of the turn with “Show earlier” to copy or quote the whole turn.</sys:String>
     <sys:String x:Key="str_Chat_ActionRetry">Retry</sys:String>
     <sys:String x:Key="str_Chat_ActionInfo">Turn info</sys:String>
 

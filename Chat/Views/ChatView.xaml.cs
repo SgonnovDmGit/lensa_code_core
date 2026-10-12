@@ -119,21 +119,16 @@ namespace LenSa.Core.Chat.Views
         private void CopyMessage_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button btn || btn.DataContext is not ChatMessage msg) return;
-            try { Clipboard.SetText(msg.Content ?? string.Empty); }
+            if (!btn.IsEnabled) return;
+            if (DataContext is not ChatViewModelBase vm) return;
+            var text = ChatTurnLayout.CollectText(vm.Messages, msg);
+            if (string.IsNullOrEmpty(text)) return;
+            try { Clipboard.SetText(text); }
             catch { return; /* клипборд занят другим процессом */ }
 
             // ✓-фидбек: иконка меняется на галочку SuccessColor на ~1.2 с
-            var original = btn.Content;
-            var check = new Path
-            {
-                Width = 13,
-                Height = 13,
-                Stretch = Stretch.Uniform,
-                Data = Geometry.Parse("M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z")
-            };
-            check.SetResourceReference(Shape.FillProperty, "SuccessColor");
-            btn.Content = check;
-            btn.IsEnabled = false;
+            var feedback = BeginCopyFeedback(btn);
+            if (feedback is null) return;
 
             var timer = new System.Windows.Threading.DispatcherTimer
             {
@@ -142,10 +137,35 @@ namespace LenSa.Core.Chat.Views
             timer.Tick += (_, _) =>
             {
                 timer.Stop();
-                btn.Content = original;
-                btn.IsEnabled = true;
+                EndCopyFeedback(btn, feedback);
             };
             timer.Start();
+        }
+
+        private sealed record CopyFeedbackState(object? Content, object? Tag);
+
+        private static CopyFeedbackState? BeginCopyFeedback(Button button)
+        {
+            if (Equals(button.Tag, true)) return null;
+            var state = new CopyFeedbackState(button.Content, button.Tag);
+            button.Tag = true;
+            var check = new Path
+            {
+                Width = 13,
+                Height = 13,
+                Stretch = Stretch.Uniform,
+                Data = Geometry.Parse("M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z")
+            };
+            check.SetResourceReference(Shape.FillProperty, "SuccessColor");
+            button.Content = check;
+            return state;
+        }
+
+        private static void EndCopyFeedback(Button button, object? feedback)
+        {
+            if (feedback is not CopyFeedbackState state) return;
+            button.Content = state.Content;
+            button.Tag = state.Tag;
         }
 
         private void QuoteMessage_Click(object sender, RoutedEventArgs e)
@@ -153,7 +173,9 @@ namespace LenSa.Core.Chat.Views
             if ((sender as FrameworkElement)?.DataContext is not ChatMessage msg) return;
             if (DataContext is not ChatViewModelBase vm) return;
 
-            var lines = (msg.Content ?? string.Empty).Replace("\r\n", "\n").Split('\n');
+            var text = ChatTurnLayout.CollectText(vm.Messages, msg);
+            if (string.IsNullOrEmpty(text)) return;
+            var lines = text.Replace("\r\n", "\n").Split('\n');
             var quoted = string.Join("\n", System.Linq.Enumerable.Select(lines, l => "> " + l)) + "\n\n";
             vm.InputText = quoted + vm.InputText;
         }

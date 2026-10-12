@@ -73,6 +73,7 @@
     <!-- Message actions -->
     <sys:String x:Key="str_Chat_ActionCopy">Копировать</sys:String>
     <sys:String x:Key="str_Chat_ActionQuote">Цитировать</sys:String>
+    <sys:String x:Key="str_Chat_TurnStartRequired">Загрузите начало хода кнопкой «Показать раньше», чтобы скопировать или процитировать весь ход</sys:String>
     <sys:String x:Key="str_Chat_ActionRetry">Повторить</sys:String>
     <sys:String x:Key="str_Chat_ActionInfo">Инфо про ход</sys:String>
 

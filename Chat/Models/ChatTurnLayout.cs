@@ -95,5 +95,44 @@ namespace LenSa.Core.Chat.Models
             }
         }
 
+        /// <summary>
+        /// Collect visible text from the complete contiguous assistant series containing member.
+        /// An open history start must never be silently reduced to its visible tail.
+        /// </summary>
+        public static string CollectText(IList<ChatMessage> messages, ChatMessage member)
+        {
+            if (messages is null) throw new ArgumentNullException(nameof(messages));
+            if (member is null) throw new ArgumentNullException(nameof(member));
+            if (member.Role != MessageRoles.Assistant ||
+                member.IsTurnStartMissing ||
+                !member.CanCollectTurnText)
+                return string.Empty;
+
+            var memberIndex = -1;
+            for (var index = 0; index < messages.Count; index++)
+            {
+                if (!ReferenceEquals(messages[index], member)) continue;
+                memberIndex = index;
+                break;
+            }
+            if (memberIndex < 0) return string.Empty;
+
+            var start = memberIndex;
+            while (start > 0 && messages[start - 1].Role == MessageRoles.Assistant)
+                start--;
+            var end = memberIndex;
+            while (end + 1 < messages.Count && messages[end + 1].Role == MessageRoles.Assistant)
+                end++;
+
+            if (messages[start].IsTurnStartMissing) return string.Empty;
+            var parts = new List<string>();
+            for (var index = start; index <= end; index++)
+            {
+                var message = messages[index];
+                if (message.IsThinking || string.IsNullOrWhiteSpace(message.Content)) continue;
+                parts.Add(message.Content);
+            }
+            return string.Join("\n\n", parts);
+        }
     }
 }

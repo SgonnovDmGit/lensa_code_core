@@ -48,6 +48,29 @@
             </Setter>
         </Style>
 
+        <Style x:Key="TurnActionButton" TargetType="Button" BasedOn="{StaticResource MsgActionButton}">
+            <Setter Property="IsEnabled" Value="{Binding CanCollectTurnText}"/>
+            <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
+        </Style>
+        <Style x:Key="CopyTurnButton" TargetType="Button" BasedOn="{StaticResource TurnActionButton}">
+            <Setter Property="ToolTip" Value="{DynamicResource str_Chat_ActionCopy}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsTurnStartMissing}" Value="True">
+                    <Setter Property="ToolTip" Value="{DynamicResource str_Chat_TurnStartRequired}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Tag, RelativeSource={RelativeSource Self}}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="QuoteTurnButton" TargetType="Button" BasedOn="{StaticResource TurnActionButton}">
+            <Setter Property="ToolTip" Value="{DynamicResource str_Chat_ActionQuote}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsTurnStartMissing}" Value="True">
+                    <Setter Property="ToolTip" Value="{DynamicResource str_Chat_TurnStartRequired}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
         <!-- ================= USER ================= -->
         <DataTemplate x:Key="UserTemplate">
             <Border HorizontalAlignment="Right"
@@ -365,32 +388,34 @@
                                 <Run Text="{DynamicResource str_Chat_ServerPrefix}"/><Run Text="{Binding ServerDetail}"/>
                             </TextBlock>
 
-                            <!-- Кнопки-иконки: Копировать (✓-фидбек) и Цитата -->
-                            <StackPanel Orientation="Horizontal"
-                                        HorizontalAlignment="Right"
-                                        Margin="0,6,0,0">
-                                <Button Style="{StaticResource MsgActionButton}"
-                                        ToolTip="{DynamicResource str_Chat_ActionCopy}"
-                                        Click="CopyMessage_Click"
-                                        Margin="0,0,4,0">
-                                    <Path Width="13" Height="13" Stretch="Uniform"
-                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                          Data="M8 3h11a1 1 0 0 1 1 1v13h-2V5H8V3zM4 7h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm1 2v10h9V9H5z"/>
-                                </Button>
-                                <Button Style="{StaticResource MsgActionButton}"
-                                        ToolTip="{DynamicResource str_Chat_ActionQuote}"
-                                        Click="QuoteMessage_Click">
-                                    <Path Width="13" Height="13" Stretch="Uniform"
-                                          Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                          Data="M6.5 5C4 5 2 7.2 2 10c0 2.5 1.7 4.4 4 4.4-.3 1.9-1.5 3.3-3.4 4.1l.9 1.5c3.6-1.2 5.9-4.1 5.9-8C9.4 8 8.3 5 6.5 5zm11 0C15 5 13 7.2 13 10c0 2.5 1.7 4.4 4 4.4-.3 1.9-1.5 3.3-3.4 4.1l.9 1.5c3.6-1.2 5.9-4.1 5.9-8C20.4 8 19.3 5 17.5 5z"/>
-                                </Button>
-                            </StackPanel>
                         </StackPanel>
                     </Border>
 
-                    <!-- T-000189: model, final response time and keyboard-accessible metrics. -->
-                    <views:MetricChip Message="{Binding}" HorizontalAlignment="Right" Margin="0,6,0,0"
-                                      Visibility="{Binding HasChain, Converter={StaticResource BoolToVis}}"/>
+                    <Grid x:Name="TurnFooter" Margin="0,6,0,0"
+                          Visibility="{Binding ShowTurnFooter, Converter={StaticResource BoolToVis}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <views:MetricChip Grid.Column="0" Message="{Binding}" ShowInfo="False"
+                                          HorizontalAlignment="Left"/>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource CopyTurnButton}"
+                                    Click="CopyMessage_Click" Margin="0,0,4,0">
+                                <Path Width="13" Height="13" Stretch="Uniform"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      Data="M8 3h11a1 1 0 0 1 1 1v13h-2V5H8V3zM4 7h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm1 2v10h9V9H5z"/>
+                            </Button>
+                            <Button Style="{StaticResource QuoteTurnButton}" Click="QuoteMessage_Click">
+                                <Path Width="13" Height="13" Stretch="Uniform"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      Data="M6.5 5C4 5 2 7.2 2 10c0 2.5 1.7 4.4 4 4.4-.3 1.9-1.5 3.3-3.4 4.1l.9 1.5c3.6-1.2 5.9-4.1 5.9-8C9.4 8 8.3 5 6.5 5zm11 0C15 5 13 7.2 13 10c0 2.5 1.7 4.4 4 4.4-.3 1.9-1.5 3.3-3.4 4.1l.9 1.5c3.6-1.2 5.9-4.1 5.9-8C20.4 8 19.3 5 17.5 5z"/>
+                            </Button>
+                            <views:MetricChip Message="{Binding}" ShowFooter="False"
+                                              Visibility="{Binding HasChain, Converter={StaticResource BoolToVis}}"
+                                              Margin="4,0,0,0"/>
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
                 </Grid>
             </Border>

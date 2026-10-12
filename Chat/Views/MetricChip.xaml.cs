@@ -17,6 +17,8 @@ namespace LenSa.Core.Chat.Views
     {
         public static readonly DependencyProperty MessageProperty = DependencyProperty.Register(
             nameof(Message), typeof(ChatMessage), typeof(MetricChip), new PropertyMetadata(null, MessageChanged));
+        public static readonly DependencyProperty ShowInfoProperty = DependencyProperty.Register(
+            nameof(ShowInfo), typeof(bool), typeof(MetricChip), new PropertyMetadata(true, InfoChanged));
         public static readonly DependencyProperty ShowFooterProperty = DependencyProperty.Register(
             nameof(ShowFooter), typeof(bool), typeof(MetricChip), new PropertyMetadata(true, FooterChanged));
         private static WeakReference<MetricChip>? _openChip;
@@ -31,6 +33,11 @@ namespace LenSa.Core.Chat.Views
         {
             get => (bool)GetValue(ShowFooterProperty);
             set => SetValue(ShowFooterProperty, value);
+        }
+        public bool ShowInfo
+        {
+            get => (bool)GetValue(ShowInfoProperty);
+            set => SetValue(ShowInfoProperty, value);
         }
         public bool IsCardOpen => CardPopup.IsOpen;
         private MetricCardView? Card => _card;
@@ -53,6 +60,8 @@ namespace LenSa.Core.Chat.Views
             chip.Refresh();
         }
         private static void FooterChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e) =>
+            ((MetricChip)sender).Refresh();
+        private static void InfoChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e) =>
             ((MetricChip)sender).Refresh();
         private void Message_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
@@ -80,6 +89,7 @@ namespace LenSa.Core.Chat.Views
                 ? Visibility.Visible : Visibility.Collapsed;
             FooterTime.Visibility = ShowFooter && !string.IsNullOrEmpty(FooterTime.Text)
                 ? Visibility.Visible : Visibility.Collapsed;
+            InfoButton.Visibility = ShowInfo ? Visibility.Visible : Visibility.Collapsed;
             InfoButton.ToolTip = BuildQuickTip(
                 stats?.CostCoins?.ToString("F2", CultureInfo.CurrentCulture),
                 stats?.CreatedAt?.ToLocalTime().ToString("dd.MM.yyyy · HH:mm", CultureInfo.CurrentCulture));
