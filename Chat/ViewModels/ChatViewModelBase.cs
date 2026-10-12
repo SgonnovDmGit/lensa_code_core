@@ -1418,6 +1418,9 @@ namespace LenSa.Core.Chat.ViewModels
         protected static string? MapCommonError(ApiException ex) =>
             MapCommonErrorPresentation(ex)?.Message;
 
+        /// <summary>Expose the shared error mapper to product-owned windows outside this hierarchy.</summary>
+        public static string? MapCommonErrorForProduct(ApiException ex) => MapCommonError(ex);
+
         protected static CommonErrorPresentation? MapCommonErrorPresentation(
             ApiException ex,
             Func<string, string?>? resourceResolver = null)
