@@ -284,7 +284,29 @@
                                                                Foreground="{DynamicResource SecondaryForeground}"/>
                                                     <TextBlock Text="{Binding Name}" FontSize="12"
                                                                TextTrimming="CharacterEllipsis"
-                                                               VerticalAlignment="Center"/>
+                                                               VerticalAlignment="Center">
+                                                        <TextBlock.Style>
+                                                            <Style TargetType="TextBlock">
+                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}"/>
+                                                                <Style.Triggers>
+                                                                    <MultiDataTrigger>
+                                                                        <MultiDataTrigger.Conditions>
+                                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True"/>
+                                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=(Selector.IsSelectionActive)}" Value="True"/>
+                                                                        </MultiDataTrigger.Conditions>
+                                                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
+                                                                    </MultiDataTrigger>
+                                                                    <MultiDataTrigger>
+                                                                        <MultiDataTrigger.Conditions>
+                                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True"/>
+                                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=(Selector.IsSelectionActive)}" Value="False"/>
+                                                                        </MultiDataTrigger.Conditions>
+                                                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.InactiveSelectionHighlightTextBrushKey}}"/>
+                                                                    </MultiDataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </TextBlock.Style>
+                                                    </TextBlock>
                                                 </DockPanel>
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>

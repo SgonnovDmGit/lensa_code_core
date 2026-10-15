@@ -303,14 +303,32 @@
                                                 </ToggleButton.Template>
                                             </ToggleButton>
 
-                                            <!-- Локализованное имя; техимя — в ToolTip -->
-                                            <TextBlock Text="{Binding Name, Converter={StaticResource ToolName}}"
-                                                       ToolTip="{Binding Name}"
+                                            <!-- Consumer title with the existing tool-name fallback. -->
+                                            <TextBlock ToolTip="{Binding Name}"
                                                        FontSize="12.5" FontWeight="SemiBold"
                                                        VerticalAlignment="Center"
                                                        TextTrimming="CharacterEllipsis"
-                                                       Foreground="{DynamicResource PrimaryForeground}"/>
+                                                       Foreground="{DynamicResource PrimaryForeground}">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="{Binding Name, Converter={StaticResource ToolName}}"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding HasDisplayTitle}" Value="True">
+                                                                <Setter Property="Text" Value="{Binding DisplayTitle}"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </DockPanel>
+
+                                        <TextBlock Text="{Binding Subject}"
+                                                   ToolTip="{Binding Subject}"
+                                                   FontSize="11.5"
+                                                   Margin="23,1,20,0"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Foreground="{DynamicResource SecondaryForeground}"
+                                                   Visibility="{Binding HasSubject, Converter={StaticResource BoolToVis}}"/>
 
                                         <!-- JSON-вход (по шеврону) -->
                                         <Border Background="{DynamicResource CodeBackground}"

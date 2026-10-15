@@ -82,17 +82,22 @@ namespace LenSa.Core.Chat.ViewModels
             msg.ToolCalls.Clear();
             foreach (var tu in msg.ToolUses)
             {
-                msg.ToolCalls.Add(new ToolCallItem
+                var call = new ToolCallItem
                 {
                     ToolUseId = tu.Id,
                     Name = tu.Name,
                     Input = tu.Input.ValueKind == System.Text.Json.JsonValueKind.Undefined
                         ? string.Empty
                         : tu.Input.ToString()
-                });
+                };
+                ConfigureToolCall(call);
+                msg.ToolCalls.Add(call);
             }
             _activeToolCallsMessage = msg;
         }
+
+        /// <summary>Allows a consumer to add neutral presentation details to a tool card.</summary>
+        protected virtual void ConfigureToolCall(ToolCallItem call) { }
 
         // Сообщение, чьи ToolCalls сейчас исполняются — DispatchToolUsesAsync обновляет статусы.
         private ChatMessage? _activeToolCallsMessage;
