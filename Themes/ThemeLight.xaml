@@ -58,6 +58,8 @@
     <SolidColorBrush x:Key="ToolCardBorder" Color="#DFE8E3"/>
     <SolidColorBrush x:Key="SuccessColor" Color="#0FA97A"/>
     <SolidColorBrush x:Key="ErrorColor" Color="#C93C32"/>
+    <!-- Монеты всегда янтарные, как в Дилемме: на светлом фоне темнее (amber-700), на тёмном amber-400 -->
+    <SolidColorBrush x:Key="CoinColor" Color="#B45309"/>
     <SolidColorBrush x:Key="ErrorBackground" Color="#FCEBE9"/>
 
     <!-- Уровни размышлений (композер, мокап 2026-07-12): нарастание «серый → фиолетовый».
