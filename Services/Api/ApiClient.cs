@@ -410,6 +410,19 @@ namespace LenSa.Core.Services.Api
             return await SendAsync<SessionMessagesResponse>(request);
         }
 
+        /// <summary>
+        /// Метаданные диалогов по списку ID (POST /v1/api/sessions/batch, cap 200): освежить
+        /// имя, не перечитывая ленту. Контракт советует так подтянуть именное имя после хода.
+        /// </summary>
+        public async Task<SessionsBatchResponse> GetSessionsBatchAsync(
+            IEnumerable<string> ids, CancellationToken cancellationToken = default)
+        {
+            using var request = CreateRequest(HttpMethod.Post, "/v1/api/sessions/batch");
+            var json = JsonSerializer.Serialize(new { ids = new List<string>(ids) }, BodyJson);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
+            return await SendAsync<SessionsBatchResponse>(request, cancellationToken);
+        }
+
         /// <summary>Rename a session; returns the title applied by the server.</summary>
         public async Task<SessionRenameResponse> RenameSessionAsync(
             string sessionId, string title, CancellationToken cancellationToken = default)

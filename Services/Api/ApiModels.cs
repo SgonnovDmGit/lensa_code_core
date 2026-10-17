@@ -529,6 +529,13 @@ namespace LenSa.Core.Services.Api
         [JsonPropertyName("modelDisplayName")]
         public string ModelDisplayName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Текущее имя диалога из БД (client-api-chat-async.md: есть и в продолжении через
+        /// tool-results). Именное имя сервера обычно приходит именно сюда — к концу хода с тулами.
+        /// </summary>
+        [JsonPropertyName("title")]
+        public string? Title { get; set; }
+
         [JsonPropertyName("codeChanges")]
         public CodeChangeDto[]? CodeChanges { get; set; }
 
@@ -994,6 +1001,16 @@ namespace LenSa.Core.Services.Api
     }
 
     // --- Session actions and properties (T-000203) ---
+
+    /// <summary>Ответ POST /v1/api/sessions/batch: метаданные диалогов по списку ID.</summary>
+    public class SessionsBatchResponse
+    {
+        [JsonPropertyName("serviceInfo")]
+        public ServiceInfo ServiceInfo { get; set; } = new();
+
+        [JsonPropertyName("sessions")]
+        public SessionDto[] Sessions { get; set; } = Array.Empty<SessionDto>();
+    }
 
     public class SessionRenameResponse
     {
