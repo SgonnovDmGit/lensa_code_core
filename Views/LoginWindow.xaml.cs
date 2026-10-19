@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using LenSa.Core.Branding;
 using LenSa.Core.Services.Api;
+using LenSa.Core.Services.Theme;
 
 namespace LenSa.Core.Views
 {
@@ -28,6 +29,7 @@ namespace LenSa.Core.Views
             _branding = branding ?? throw new ArgumentNullException(nameof(branding));
             _api = api ?? throw new ArgumentNullException(nameof(api));
             InitializeComponent();
+            WindowCaptionTheme.Attach(this);
             // Заголовок окна — из брендинга (Core не знает имени конкретного продукта).
             Title = _branding.DisplayName;
             Loaded += (_, _) => KeyBox.Focus();

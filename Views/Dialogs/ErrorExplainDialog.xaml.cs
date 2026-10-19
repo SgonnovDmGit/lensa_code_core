@@ -1,4 +1,5 @@
 using System.Windows;
+using LenSa.Core.Services.Theme;
 
 namespace LenSa.Core.Views.Dialogs
 {
@@ -11,6 +12,7 @@ namespace LenSa.Core.Views.Dialogs
         public ErrorExplainDialog()
         {
             InitializeComponent();
+            WindowCaptionTheme.Attach(this);
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
