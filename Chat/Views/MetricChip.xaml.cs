@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Data;
 using System.Windows.Threading;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -21,6 +22,8 @@ namespace LenSa.Core.Chat.Views
             nameof(ShowInfo), typeof(bool), typeof(MetricChip), new PropertyMetadata(true, InfoChanged));
         public static readonly DependencyProperty ShowFooterProperty = DependencyProperty.Register(
             nameof(ShowFooter), typeof(bool), typeof(MetricChip), new PropertyMetadata(true, FooterChanged));
+        private static readonly DependencyProperty CardOpenStateProperty = DependencyProperty.Register(
+            "CardOpenState", typeof(bool), typeof(MetricChip), new PropertyMetadata(false, CardOpenStateChanged));
         private static WeakReference<MetricChip>? _openChip;
         private MetricCardView? _card;
 
@@ -43,10 +46,12 @@ namespace LenSa.Core.Chat.Views
         private MetricCardView? Card => _card;
         private bool _awaitingAnchorMouseDown;
         private bool _suppressClickAfterPopupMouseClose;
+        private bool _closingCardExplicitly;
 
         public MetricChip()
         {
             InitializeComponent();
+            SetBinding(CardOpenStateProperty, new Binding(nameof(Popup.IsOpen)) { Source = CardPopup, Mode = BindingMode.OneWay });
             CardPopup.CustomPopupPlacementCallback = PlaceCard;
             Loaded += Chip_Loaded;
         }
@@ -150,7 +155,14 @@ namespace LenSa.Core.Chat.Views
             CardScroll.Focus();
         }
 
-        public void CloseCard() { if (CardPopup is not null) CardPopup.IsOpen = false; }
+        public void CloseCard()
+        {
+            if (_openChip?.TryGetTarget(out var chip) == true && chip == this) _openChip = null;
+            if (CardPopup is null) return;
+            _closingCardExplicitly = true;
+            try { CardPopup.IsOpen = false; }
+            finally { _closingCardExplicitly = false; }
+        }
 
         private MetricCardView EnsureCard()
         {
@@ -222,15 +234,21 @@ namespace LenSa.Core.Chat.Views
         private void CardPopup_Closed(object sender, EventArgs e)
         {
             if (_openChip?.TryGetTarget(out var chip) == true && chip == this) _openChip = null;
-            var point = Mouse.GetPosition(InfoButton);
-            if (Mouse.LeftButton == MouseButtonState.Pressed &&
-                new Rect(new Point(), InfoButton.RenderSize).Contains(point))
+        }
+        private static void CardOpenStateChanged(DependencyObject sender, DependencyPropertyChangedEventArgs e)
+        {
+            var chip = (MetricChip)sender;
+            // IsOpen changes during native outside-dismiss, before the anchor gets the down.
+            // Closed is deferred until HWND destruction and can arrive after Button.Click.
+            if (!(bool)e.NewValue && !chip._closingCardExplicitly &&
+                Mouse.LeftButton == MouseButtonState.Pressed &&
+                new Rect(new Point(), chip.InfoButton.RenderSize).Contains(Mouse.GetPosition(chip.InfoButton)))
             {
-                _awaitingAnchorMouseDown = true;
-                Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
+                chip._awaitingAnchorMouseDown = true;
+                chip.Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
                 {
                     if (Mouse.LeftButton == MouseButtonState.Released)
-                        _awaitingAnchorMouseDown = false;
+                        chip._awaitingAnchorMouseDown = false;
                 }));
             }
         }
