@@ -207,6 +207,9 @@ namespace LenSa.Core.Chat.Views
         }
         private void InfoButton_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
+            // Popup capture can consume the preview down, while ButtonBase still
+            // receives the bubbling down and will raise Click on this release.
+            if (_awaitingAnchorMouseDown) _suppressClickAfterPopupMouseClose = true;
             _awaitingAnchorMouseDown = false;
             if (!_suppressClickAfterPopupMouseClose) return;
             Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() =>
