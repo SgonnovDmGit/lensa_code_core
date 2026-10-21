@@ -198,4 +198,9 @@
     <sys:String x:Key="str_MetricCoinsUnit">монеты</sys:String>
     <sys:String x:Key="str_MetricSecondsUnit">сек</sys:String>
     <sys:String x:Key="str_MetricSpeedUnit">токенов/сек</sys:String>
+    <sys:String x:Key="str_Dialog_Delete">Удалить</sys:String>
+    <sys:String x:Key="str_Dialog_Cancel">Отмена</sys:String>
+    <sys:String x:Key="str_Dialog_Ok">ОК</sys:String>
+    <sys:String x:Key="str_GetKeyLink">Как получить ключ</sys:String>
+    <sys:String x:Key="str_OpenLinkFailed">Не удалось открыть страницу.</sys:String>
 </ResourceDictionary>

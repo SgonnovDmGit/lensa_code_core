@@ -303,13 +303,32 @@ namespace LenSa.Core.Services.Api
                 if (error?.ServiceInfo != null)
                     throw new ApiException(
                         error.ServiceInfo.ErrorCode ?? "UNKNOWN",
-                        error.Message ?? response.ReasonPhrase ?? "Unknown error");
+                        error.Message ?? response.ReasonPhrase ?? "Unknown error")
+                    {
+                        RetryAfterSeconds = error.RetryAfterSeconds,
+                        MinLength = error.MinLength,
+                        MaxLength = error.MaxLength
+                    };
             }
             catch (JsonException) { }
 
             throw new ApiException(
                 $"HTTP_{(int)response.StatusCode}",
                 response.ReasonPhrase ?? "Unknown error");
+        }
+
+        public async Task<FeedbackResponse> PostFeedbackAsync(string text, string kind, int? rating,
+            CancellationToken cancellationToken = default)
+        {
+            var payload = new Dictionary<string, object> { ["text"] = text, ["kind"] = kind };
+            if (rating.HasValue) payload["rating"] = rating.Value;
+            using var request = CreateRequest(HttpMethod.Post, "/v1/feedback");
+            request.Content = new StringContent(JsonSerializer.Serialize(payload, BodyJson), Encoding.UTF8, "application/json");
+            var response = await SendWithResponseAsync(request, DeserializeOrThrow<FeedbackResponse>,
+                cancellationToken, HttpStatusCode.OK);
+            if (response.ServiceInfo?.Success != true)
+                throw new ApiException(response.ServiceInfo?.ErrorCode ?? "FEEDBACK_FAILED", "Feedback was not accepted");
+            return response;
         }
 
         public async Task<MeResponse> GetMeAsync()
@@ -541,7 +560,8 @@ namespace LenSa.Core.Services.Api
         private async Task<T> SendWithResponseAsync<T>(
             HttpRequestMessage request,
             Func<string, T> parseSuccess,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            HttpStatusCode? expectedStatus = null)
         {
             HttpResponseMessage response;
             try
@@ -573,7 +593,12 @@ namespace LenSa.Core.Services.Api
                         if (error?.ServiceInfo != null)
                             throw new ApiException(
                                 error.ServiceInfo.ErrorCode ?? "UNKNOWN",
-                                error.Message ?? response.ReasonPhrase ?? "Unknown error");
+                                error.Message ?? response.ReasonPhrase ?? "Unknown error")
+                            {
+                                RetryAfterSeconds = error.RetryAfterSeconds,
+                                MinLength = error.MinLength,
+                                MaxLength = error.MaxLength
+                            };
                     }
                     catch (JsonException) { }
 
@@ -582,6 +607,8 @@ namespace LenSa.Core.Services.Api
                         response.ReasonPhrase ?? "Unknown error");
                 }
 
+                if (expectedStatus.HasValue && response.StatusCode != expectedStatus.Value)
+                    throw new ApiException($"HTTP_{(int)response.StatusCode}", "Unexpected response status");
                 return parseSuccess(body);
             }
         }

@@ -17,6 +17,7 @@ namespace LenSa.Core.Chat.Views
         private double _prependAnchorY;
         private double _prependExtentHeight;
         private bool _prependRestoreQueued;
+        private WeakReference<RichTextBox>? _selectedMessageBody;
 
         public ChatView()
         {
@@ -26,10 +27,21 @@ namespace LenSa.Core.Chat.Views
 
         private void OnDataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            ForgetSelection();
             if (e.OldValue is ChatViewModelBase oldVm)
                 oldVm.Messages.CollectionChanged -= OnMessagesChanged;
             if (e.NewValue is ChatViewModelBase newVm)
                 newVm.Messages.CollectionChanged += OnMessagesChanged;
+        }
+
+        private void ThreadScroll_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (!ReferenceEquals(e.OriginalSource, ThreadScroll)) return;
+            var wasAtBottom = e.VerticalOffset - e.VerticalChange >=
+                (e.ExtentHeight - e.ExtentHeightChange) -
+                (e.ViewportHeight - e.ViewportHeightChange) - 40;
+            if (e.ViewportHeightChange != 0 && wasAtBottom)
+                ThreadScroll.ScrollToEnd();
         }
 
         private void OnMessagesChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -209,14 +221,100 @@ namespace LenSa.Core.Chat.Views
 
         private void QuoteMessage_Click(object sender, RoutedEventArgs e)
         {
-            if ((sender as FrameworkElement)?.DataContext is not ChatMessage msg) return;
+            if (sender is not Button button || !button.IsEnabled || button.DataContext is not ChatMessage msg) return;
             if (DataContext is not ChatViewModelBase vm) return;
 
             var text = ChatTurnLayout.CollectText(vm.Messages, msg);
             if (string.IsNullOrEmpty(text)) return;
+            if (_selectedMessageBody?.TryGetTarget(out var body) == true &&
+                !body.Selection.IsEmpty && body.DataContext is ChatMessage selected &&
+                IsInTurn(vm, msg, selected))
+            {
+                var selection = body.Selection.Text.Trim();
+                if (selection.Length > 0) text = selection;
+            }
+            ForgetSelection();
             var lines = text.Replace("\r\n", "\n").Split('\n');
             var quoted = string.Join("\n", System.Linq.Enumerable.Select(lines, l => "> " + l)) + "\n\n";
             vm.InputText = quoted + vm.InputText;
+
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                FindComposer()?.FocusInputAtEnd();
+                var footer = FindAncestor<Grid>(button, grid => grid.Name == "TurnFooter");
+                if (footer == null || !footer.IsVisible || !ThreadScroll.IsAncestorOf(footer)) return;
+                // Use the viewport's origin, excluding the outer ScrollViewer padding.
+                if (ThreadScroll.Template.FindName("PART_ScrollContentPresenter", ThreadScroll) is not ScrollContentPresenter viewport)
+                    return;
+                var bounds = footer.TransformToAncestor(viewport)
+                    .TransformBounds(new Rect(footer.RenderSize));
+                var overlap = bounds.Bottom + 8 - viewport.ActualHeight;
+                if (overlap > 0)
+                    ThreadScroll.ScrollToVerticalOffset(ThreadScroll.VerticalOffset + overlap);
+            }), System.Windows.Threading.DispatcherPriority.ContextIdle);
+        }
+
+        private void MessageBody_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (sender is not RichTextBox body) return;
+            if (!body.Selection.IsEmpty)
+                _selectedMessageBody = new WeakReference<RichTextBox>(body);
+            else if (_selectedMessageBody?.TryGetTarget(out var previous) == true && ReferenceEquals(body, previous))
+                _selectedMessageBody = null;
+        }
+
+        private void MessageBody_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            if (sender is not RichTextBox body ||
+                _selectedMessageBody?.TryGetTarget(out var selected) != true || !ReferenceEquals(body, selected)) return;
+            var button = e.NewFocus is DependencyObject target
+                ? FindAncestor<Button>(target, candidate => candidate.Name == "QuoteButton") : null;
+            if (button?.DataContext is ChatMessage member && body.DataContext is ChatMessage selection &&
+                DataContext is ChatViewModelBase vm && IsInTurn(vm, member, selection)) return;
+            ForgetSelection();
+        }
+
+        private void QuoteButton_LostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e) => ForgetSelection();
+
+        private static bool IsInTurn(ChatViewModelBase vm, ChatMessage member, ChatMessage candidate)
+        {
+            var range = ChatTurnLayout.TurnRange(vm.Messages, member);
+            if (range is null) return false;
+            for (var index = range.Value.Start; index <= range.Value.End; index++)
+                if (ReferenceEquals(vm.Messages[index], candidate)) return true;
+            return false;
+        }
+
+        private void ForgetSelection()
+        {
+            var reference = _selectedMessageBody;
+            _selectedMessageBody = null;
+            if (reference?.TryGetTarget(out var body) == true && !body.Selection.IsEmpty)
+                body.Selection.Select(body.Selection.Start, body.Selection.Start);
+        }
+
+        private ChatInputBar? FindComposer()
+        {
+            for (DependencyObject? parent = VisualTreeHelper.GetParent(this); parent != null;
+                 parent = VisualTreeHelper.GetParent(parent))
+                if (parent is Panel && FindDescendant<ChatInputBar>(parent) is { } composer) return composer;
+            return null;
+        }
+
+        private static T? FindAncestor<T>(DependencyObject start, Func<T, bool> predicate) where T : DependencyObject
+        {
+            for (DependencyObject? current = start; current != null; current =
+                 current is Visual ? VisualTreeHelper.GetParent(current) : LogicalTreeHelper.GetParent(current))
+                if (current is T match && predicate(match)) return match;
+            return null;
+        }
+
+        private static T? FindDescendant<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent is T match) return match;
+            for (var index = 0; index < VisualTreeHelper.GetChildrenCount(parent); index++)
+                if (FindDescendant<T>(VisualTreeHelper.GetChild(parent, index)) is { } child) return child;
+            return null;
         }
 
         // Спиннер running-карточки тула: вращение стартуем кодом на локальном

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace LenSa.Core.Services.Theme
@@ -15,6 +16,7 @@ namespace LenSa.Core.Services.Theme
         private static int _productStringsIndex;
         private static ResourceDictionary? _appResources;
         private static string? _productAssemblyName;
+        private static IReadOnlyDictionary<AppTheme, Uri>? _productOverlays;
 
         public static AppTheme CurrentTheme { get; private set; } = AppTheme.Light;
         public static AppLanguage CurrentLanguage { get; private set; } = AppLanguage.Ru;
@@ -36,6 +38,17 @@ namespace LenSa.Core.Services.Theme
             int coreStringsIndex,
             int productStringsIndex,
             string productAssemblyName)
+            => Initialize(appResources, themeIndex, coreStringsIndex, productStringsIndex,
+                productAssemblyName, null);
+
+        /// <summary>Registers optional product layers and applies the current theme immediately.</summary>
+        public static void Initialize(
+            ResourceDictionary appResources,
+            int themeIndex,
+            int coreStringsIndex,
+            int productStringsIndex,
+            string productAssemblyName,
+            IReadOnlyDictionary<AppTheme, Uri>? productOverlays)
         {
             if (appResources is null) throw new ArgumentNullException(nameof(appResources));
             if (string.IsNullOrEmpty(productAssemblyName)) throw new ArgumentException("Product assembly name required", nameof(productAssemblyName));
@@ -53,6 +66,8 @@ namespace LenSa.Core.Services.Theme
             _coreStringsIndex = coreStringsIndex;
             _productStringsIndex = productStringsIndex;
             _productAssemblyName = productAssemblyName;
+            _productOverlays = productOverlays;
+            _appResources.MergedDictionaries[_themeIndex] = CreateThemeDictionary(CurrentTheme);
         }
 
         /// <summary>
@@ -64,8 +79,7 @@ namespace LenSa.Core.Services.Theme
             if (theme == CurrentTheme)
                 return;
 
-            var uri = GetThemeUri(theme);
-            _appResources!.MergedDictionaries[_themeIndex] = new ResourceDictionary { Source = uri };
+            _appResources!.MergedDictionaries[_themeIndex] = CreateThemeDictionary(theme);
             CurrentTheme = theme;
             ThemeChanged?.Invoke();
         }
@@ -97,6 +111,15 @@ namespace LenSa.Core.Services.Theme
             _appResources!.MergedDictionaries[_productStringsIndex] = new ResourceDictionary { Source = productUri };
             CurrentLanguage = language;
             LanguageChanged?.Invoke();
+        }
+
+        private static ResourceDictionary CreateThemeDictionary(AppTheme theme)
+        {
+            var dictionary = new ResourceDictionary();
+            dictionary.MergedDictionaries.Add(new ResourceDictionary { Source = GetThemeUri(theme) });
+            if (_productOverlays != null && _productOverlays.TryGetValue(theme, out var overlay))
+                dictionary.MergedDictionaries.Add(new ResourceDictionary { Source = overlay });
+            return dictionary;
         }
 
         private static Uri GetThemeUri(AppTheme theme)

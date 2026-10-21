@@ -29,6 +29,22 @@
     <SolidColorBrush x:Key="ScrollBarBackground" Color="#EEF3F0"/>
     <SolidColorBrush x:Key="ScrollBarThumb" Color="#C6D0CB"/>
 
+
+    <!-- Product-overridable chat surfaces; defaults preserve the Core palette. -->
+    <SolidColorBrush x:Key="ContextOkColor" Color="#0FA97A"/>
+    <SolidColorBrush x:Key="ChatFeedBackground" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ChatHeaderBackground" Color="#F3F7F5"/>
+    <SolidColorBrush x:Key="ChatPickerBackground" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ChatPickerBorder" Color="#D5DDD9"/>
+    <SolidColorBrush x:Key="TaskBoardBackground" Color="#F3F7F5"/>
+    <SolidColorBrush x:Key="TaskBoardBorder" Color="#D5DDD9"/>
+    <SolidColorBrush x:Key="ComposerStripBackground" Color="#F3F7F5"/>
+    <SolidColorBrush x:Key="ComposerStripBorder" Color="#D5DDD9"/>
+    <SolidColorBrush x:Key="ComposerBackground" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="ComposerBorder" Color="#C6D2CC"/>
+    <SolidColorBrush x:Key="ComposerFocusBorder" Color="#C6D2CC"/>
+    <Thickness x:Key="ComposerFocusThickness">1</Thickness>
+
     <!-- Chat & Diff -->
     <SolidColorBrush x:Key="UserBubbleBackground" Color="#DDF5EB"/>
     <SolidColorBrush x:Key="AssistantBubbleBackground" Color="#F3F7F5"/>

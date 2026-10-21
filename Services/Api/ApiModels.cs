@@ -499,6 +499,24 @@ namespace LenSa.Core.Services.Api
 
         [JsonPropertyName("message")]
         public string Message { get; set; } = string.Empty;
+
+        [JsonPropertyName("retryAfterSeconds")]
+        public int? RetryAfterSeconds { get; set; }
+
+        [JsonPropertyName("minLength")]
+        public int? MinLength { get; set; }
+
+        [JsonPropertyName("maxLength")]
+        public int? MaxLength { get; set; }
+    }
+
+    public sealed class FeedbackResponse
+    {
+        [JsonPropertyName("serviceInfo")]
+        public ServiceInfo ServiceInfo { get; set; } = new();
+
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
     }
 
     public static class ToolFailureTypes
@@ -1179,6 +1197,9 @@ namespace LenSa.Core.Services.Api
     public class ApiException : Exception
     {
         public string ErrorCode { get; }
+        public int? RetryAfterSeconds { get; init; }
+        public int? MinLength { get; init; }
+        public int? MaxLength { get; init; }
 
         public ApiException(string errorCode, string message) : base(message)
         {

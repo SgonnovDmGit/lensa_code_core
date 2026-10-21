@@ -50,13 +50,14 @@
                 IsDefault="True"/>
 
         <!-- Подсказка «Нет ключа?» -->
-        <TextBlock Grid.Row="6"
-                   Text="{DynamicResource str_NoKeyHint}"
+        <TextBlock Grid.Row="6" x:Name="NoKeyHint"
                    Foreground="{DynamicResource SecondaryForeground}"
                    FontSize="11"
                    TextWrapping="Wrap"
                    HorizontalAlignment="Center"
-                   TextAlignment="Center"/>
+                   TextAlignment="Center">
+            <Run Text="{DynamicResource str_NoKeyHint}"/>
+        </TextBlock>
 
         <!-- Ошибка -->
         <TextBlock Grid.Row="8"

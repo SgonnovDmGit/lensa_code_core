@@ -29,6 +29,13 @@ namespace LenSa.Core.Chat.Views
             InitializeComponent();
         }
 
+        public void FocusInputAtEnd()
+        {
+            InputTextBox.Focus();
+            InputTextBox.CaretIndex = InputTextBox.Text.Length;
+            InputTextBox.ScrollToEnd();
+        }
+
         // Enter → отправка; Shift+Enter → перенос строки (AcceptsReturn=true).
         // По memory feedback_wpf_textbox_enter — обязательно PreviewKeyDown, не KeyDown.
         private void InputTextBox_PreviewKeyDown(object sender, KeyEventArgs e)

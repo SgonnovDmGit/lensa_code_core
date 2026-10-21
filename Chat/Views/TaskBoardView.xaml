@@ -111,8 +111,8 @@
         </Style>
     </UserControl.Resources>
 
-    <Border Background="{DynamicResource SecondaryBackground}"
-            BorderBrush="{DynamicResource BorderColor}"
+    <Border Background="{DynamicResource TaskBoardBackground}"
+            BorderBrush="{DynamicResource TaskBoardBorder}"
             BorderThickness="1"
             CornerRadius="6">
         <!-- Scope общий для шапки и строк: иначе шапка живёт в своём scope, её Auto-колонки

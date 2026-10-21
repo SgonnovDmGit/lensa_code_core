@@ -4,10 +4,10 @@
              Unloaded="Chip_Unloaded">
     <UserControl.Resources>
         <Style x:Key="InfoButtonStyle" TargetType="Button">
-            <Setter Property="Width" Value="22"/>
-            <Setter Property="Height" Value="22"/>
+            <Setter Property="Width" Value="28"/>
+            <Setter Property="Height" Value="24"/>
             <Setter Property="Padding" Value="0"/>
-            <Setter Property="Background" Value="{DynamicResource SecondaryBackground}"/>
+            <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
             <Setter Property="Foreground" Value="{DynamicResource SecondaryForeground}"/>
             <Setter Property="BorderThickness" Value="1"/>
@@ -17,15 +17,16 @@
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="ChipBorder" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="11">
+                                CornerRadius="5">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="{DynamicResource HoverBackground}"/>
-                            </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
                                 <Setter TargetName="ChipBorder" Property="BorderBrush" Value="{DynamicResource SecondaryForeground}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ChipBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -44,7 +45,7 @@
                 PreviewKeyDown="InfoButton_PreviewKeyDown"
                 AutomationProperties.Name="{DynamicResource str_MetricClickHint}"
                 ToolTipService.InitialShowDelay="150" ToolTipService.ShowDuration="60000">
-            <TextBlock Text="i" FontFamily="Georgia" FontStyle="Italic" FontWeight="SemiBold" FontSize="12"/>
+            <TextBlock Text="i" FontFamily="Georgia" FontStyle="Italic" FontWeight="SemiBold" FontSize="13.5"/>
         </Button>
         <Popup x:Name="CardPopup" PlacementTarget="{Binding ElementName=InfoButton}"
                Placement="Custom" StaysOpen="False" AllowsTransparency="True"

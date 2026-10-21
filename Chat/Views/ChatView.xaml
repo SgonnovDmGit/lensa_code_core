@@ -7,7 +7,7 @@
              xmlns:helpers="clr-namespace:LenSa.Core.Helpers"
              mc:Ignorable="d"
              d:DesignHeight="600" d:DesignWidth="720"
-             Background="{DynamicResource PrimaryBackground}">
+             Background="{DynamicResource ChatFeedBackground}">
 
     <UserControl.Resources>
         <helpers:BoolToVisibilityConverter x:Key="BoolToVis"/>
@@ -404,6 +404,8 @@
                                          Padding="0"
                                          VerticalScrollBarVisibility="Disabled"
                                          HorizontalScrollBarVisibility="Disabled"
+                                         SelectionChanged="MessageBody_SelectionChanged"
+                                         LostKeyboardFocus="MessageBody_LostKeyboardFocus"
                                          PreviewMouseWheel="MessageBody_PreviewMouseWheel"/>
 
                             <TextBlock Visibility="{Binding ServerDetail, Converter={StaticResource EmptyToVis}, ConverterParameter=invert}"
@@ -432,7 +434,8 @@
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Data="M8 3h11a1 1 0 0 1 1 1v13h-2V5H8V3zM4 7h11a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1zm1 2v10h9V9H5z"/>
                             </Button>
-                            <Button Style="{StaticResource QuoteTurnButton}" Click="QuoteMessage_Click">
+                            <Button x:Name="QuoteButton" Style="{StaticResource QuoteTurnButton}" Click="QuoteMessage_Click"
+                                    LostKeyboardFocus="QuoteButton_LostKeyboardFocus">
                                 <Path Width="13" Height="13" Stretch="Uniform"
                                       Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                       Data="M6.5 5C4 5 2 7.2 2 10c0 2.5 1.7 4.4 4 4.4-.3 1.9-1.5 3.3-3.4 4.1l.9 1.5c3.6-1.2 5.9-4.1 5.9-8C9.4 8 8.3 5 6.5 5zm11 0C15 5 13 7.2 13 10c0 2.5 1.7 4.4 4 4.4-.3 1.9-1.5 3.3-3.4 4.1l.9 1.5c3.6-1.2 5.9-4.1 5.9-8C20.4 8 19.3 5 17.5 5z"/>
@@ -667,7 +670,7 @@
              руками, без AI (схлопывается в одну строку заголовка). -->
         <views:TaskBoardView Grid.Row="0" Margin="16,12,16,0"/>
 
-        <ScrollViewer x:Name="ThreadScroll" Grid.Row="1"
+        <ScrollViewer x:Name="ThreadScroll" Grid.Row="1" ScrollChanged="ThreadScroll_ScrollChanged"
                       VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled"
                       Padding="16,12,16,0">

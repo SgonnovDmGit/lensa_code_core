@@ -32,5 +32,8 @@ namespace LenSa.Core.Branding
         /// AppConfigService.Initialize мигрирует старые файлы при первом старте.
         /// </summary>
         string ConfigFolderName { get; }
+
+        /// <summary>Optional product-specific page explaining how to obtain a user key.</summary>
+        string? GetKeyUrl => null;
     }
 }

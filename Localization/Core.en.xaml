@@ -198,4 +198,9 @@
     <sys:String x:Key="str_MetricCoinsUnit">coins</sys:String>
     <sys:String x:Key="str_MetricSecondsUnit">sec</sys:String>
     <sys:String x:Key="str_MetricSpeedUnit">tokens/sec</sys:String>
+    <sys:String x:Key="str_Dialog_Delete">Delete</sys:String>
+    <sys:String x:Key="str_Dialog_Cancel">Cancel</sys:String>
+    <sys:String x:Key="str_Dialog_Ok">OK</sys:String>
+    <sys:String x:Key="str_GetKeyLink">How to get a key</sys:String>
+    <sys:String x:Key="str_OpenLinkFailed">Could not open the page.</sys:String>
 </ResourceDictionary>

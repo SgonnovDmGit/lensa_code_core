@@ -11,6 +11,7 @@ using LenSa.Core.Chat.Models;
 using LenSa.Core.Chat.Services;
 using LenSa.Core.Helpers;
 using LenSa.Core.Services.Api;
+using LenSa.Core.Views.Dialogs;
 
 namespace LenSa.Core.Chat.ViewModels
 {
@@ -528,14 +529,15 @@ namespace LenSa.Core.Chat.ViewModels
             if (item == null) return;
 
             // Спрашиваем: в строке живёт описание, случайно потерять его обидно.
-            var answer = System.Windows.MessageBox.Show(
+            var answer = ThemedMessageDialog.Show(null,
+                FindString("str_TaskBoard_RemoveConfirmTitle", "Удаление задачи"),
                 string.Format(
                     FindString("str_TaskBoard_RemoveConfirm", "Удалить задачу «{0}»?"),
                     item.Name),
-                FindString("str_TaskBoard_RemoveConfirmTitle", "Удаление задачи"),
-                System.Windows.MessageBoxButton.YesNo,
-                System.Windows.MessageBoxImage.Question);
-            if (answer != System.Windows.MessageBoxResult.Yes) return;
+                System.Windows.MessageBoxImage.Question, System.Windows.MessageBoxResult.No,
+                new DialogButton(FindString("str_Dialog_Delete", "Удалить"), System.Windows.MessageBoxResult.Yes, DialogButtonKind.Danger),
+                new DialogButton(FindString("str_Dialog_Cancel", "Отмена"), System.Windows.MessageBoxResult.No));
+            if (answer != System.Windows.MessageBoxResult.Yes || !TaskBoard.Contains(item)) return;
 
             item.PropertyChanged -= OnTaskItemChanged;
             TaskBoard.Remove(item);

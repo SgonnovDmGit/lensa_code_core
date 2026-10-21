@@ -98,7 +98,7 @@ namespace LenSa.Core.Chat.Views
                     var zone = (string)new ContextZoneConverter().Convert(context.Fill * 100,
                         typeof(string), null!, CultureInfo.CurrentCulture);
                     body.Children.Add(Progress(context.Fill,
-                        zone == "crit" ? "ErrorColor" : zone == "warn" ? "ReasoningForeground" : "AccentColor"));
+                        zone == "crit" ? "ErrorColor" : zone == "warn" ? "ReasoningForeground" : "ContextOkColor"));
                 }
             }
             if (Data.WindowRows.Count > 0)

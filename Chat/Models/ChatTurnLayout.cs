@@ -103,12 +103,28 @@ namespace LenSa.Core.Chat.Models
         /// </summary>
         public static string CollectText(IList<ChatMessage> messages, ChatMessage member)
         {
+            var range = TurnRange(messages, member);
+            if (range is null) return string.Empty;
+
+            var parts = new List<string>();
+            for (var index = range.Value.Start; index <= range.Value.End; index++)
+            {
+                var message = messages[index];
+                if (message.IsThinking || string.IsNullOrWhiteSpace(message.Content)) continue;
+                parts.Add(message.Content);
+            }
+            return string.Join("\n\n", parts);
+        }
+
+        /// <summary>Inclusive bounds of a complete, collectable assistant turn.</summary>
+        public static (int Start, int End)? TurnRange(IList<ChatMessage> messages, ChatMessage member)
+        {
             if (messages is null) throw new ArgumentNullException(nameof(messages));
             if (member is null) throw new ArgumentNullException(nameof(member));
             if (member.Role != MessageRoles.Assistant || member.IsOutsideTurn ||
                 member.IsTurnStartMissing ||
                 !member.CanCollectTurnText)
-                return string.Empty;
+                return null;
 
             var memberIndex = -1;
             for (var index = 0; index < messages.Count; index++)
@@ -117,7 +133,7 @@ namespace LenSa.Core.Chat.Models
                 memberIndex = index;
                 break;
             }
-            if (memberIndex < 0) return string.Empty;
+            if (memberIndex < 0) return null;
 
             var start = memberIndex;
             while (start > 0 && messages[start - 1].Role == MessageRoles.Assistant &&
@@ -128,15 +144,7 @@ namespace LenSa.Core.Chat.Models
                    !messages[end + 1].IsOutsideTurn)
                 end++;
 
-            if (messages[start].IsTurnStartMissing) return string.Empty;
-            var parts = new List<string>();
-            for (var index = start; index <= end; index++)
-            {
-                var message = messages[index];
-                if (message.IsThinking || string.IsNullOrWhiteSpace(message.Content)) continue;
-                parts.Add(message.Content);
-            }
-            return string.Join("\n\n", parts);
+            return messages[start].IsTurnStartMissing ? null : (start, end);
         }
     }
 }

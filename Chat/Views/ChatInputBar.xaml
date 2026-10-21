@@ -94,15 +94,15 @@
         </Style>
     </UserControl.Resources>
 
-    <Border Background="{DynamicResource SecondaryBackground}"
-            BorderBrush="{DynamicResource BorderColor}"
+    <Border Background="{DynamicResource ComposerStripBackground}"
+            BorderBrush="{DynamicResource ComposerStripBorder}"
             BorderThickness="0,1,0,0">
 
         <!-- Читаемый максимум: на широком окне композер не растягивается на всю ширину,
              на узкой колонке просто занимает доступное. -->
         <Grid MaxWidth="760" Margin="14,10,14,12">
-            <Border Background="{DynamicResource InputBackground}"
-                    BorderBrush="{DynamicResource InputBorder}"
+            <Border Background="{DynamicResource ComposerBackground}"
+                    BorderBrush="{DynamicResource ComposerBorder}"
                     BorderThickness="1" CornerRadius="12">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -349,7 +349,7 @@
                                   Data="{Binding ActiveChat.ContextFillPercent, Converter={StaticResource PercentToArc}}">
                                 <Path.Style>
                                     <Style TargetType="Path">
-                                        <Setter Property="Stroke" Value="{DynamicResource AccentColor}"/>
+                                        <Setter Property="Stroke" Value="{DynamicResource ContextOkColor}"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding ActiveChat.ContextFillPercent, Converter={StaticResource CtxZone}}" Value="warn">
                                                 <Setter Property="Stroke" Value="{DynamicResource ReasoningForeground}"/>
@@ -383,7 +383,7 @@
                                         <DockPanel Margin="0,2">
                                             <DockPanel.Resources>
                                                 <Style x:Key="ZoneText" TargetType="TextBlock">
-                                                    <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource ContextOkColor}"/>
                                                     <Setter Property="FontSize" Value="12"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding ActiveChat.ContextFillPercent, Converter={StaticResource CtxZone}}" Value="warn">
@@ -624,6 +624,21 @@
                         </Grid>
                     </Grid>
                 </Grid>
+            </Border>
+            <Border x:Name="InputFocusBorder" CornerRadius="12"
+                    BorderBrush="{DynamicResource ComposerFocusBorder}"
+                    BorderThickness="{DynamicResource ComposerFocusThickness}"
+                    Background="{x:Null}" IsHitTestVisible="False">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsKeyboardFocused, ElementName=InputTextBox}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
             </Border>
         </Grid>
     </Border>

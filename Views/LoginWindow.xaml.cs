@@ -1,7 +1,9 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Documents;
 using LenSa.Core.Branding;
 using LenSa.Core.Services.Api;
 using LenSa.Core.Services.Theme;
@@ -32,6 +34,20 @@ namespace LenSa.Core.Views
             WindowCaptionTheme.Attach(this);
             // Заголовок окна — из брендинга (Core не знает имени конкретного продукта).
             Title = _branding.DisplayName;
+            if (!string.IsNullOrWhiteSpace(_branding.GetKeyUrl))
+            {
+                NoKeyHint.Inlines.Add(new Run(" "));
+                var caption = new Run();
+                caption.SetResourceReference(Run.TextProperty, "str_GetKeyLink");
+                var link = new Hyperlink(caption);
+                link.SetResourceReference(Hyperlink.ForegroundProperty, "AccentColor");
+                link.Click += (_, _) =>
+                {
+                    try { Process.Start(new ProcessStartInfo(_branding.GetKeyUrl) { UseShellExecute = true }); }
+                    catch { ShowError(Localize("str_OpenLinkFailed")); }
+                };
+                NoKeyHint.Inlines.Add(link);
+            }
             Loaded += (_, _) => KeyBox.Focus();
         }
 
