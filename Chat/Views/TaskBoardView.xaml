@@ -96,15 +96,15 @@
             <Setter Property="Foreground" Value="{DynamicResource SecondaryForeground}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Status}" Value="done">
-                    <Setter Property="Foreground" Value="{DynamicResource SuccessColor}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource SuccessTextForeground}"/>
                     <Setter Property="FontWeight" Value="SemiBold"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="in_progress">
-                    <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource AccentTextForeground}"/>
                     <Setter Property="FontWeight" Value="SemiBold"/>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Status}" Value="blocked">
-                    <Setter Property="Foreground" Value="{DynamicResource ErrorColor}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource ErrorTextForeground}"/>
                     <Setter Property="FontWeight" Value="SemiBold"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -188,7 +188,7 @@
                         HorizontalAlignment="Left"
                         Background="Transparent" BorderThickness="0" Cursor="Hand"
                         FontSize="11" Padding="0"
-                        Foreground="{DynamicResource AccentColor}"/>
+                        Foreground="{DynamicResource AccentTextForeground}"/>
             </Border>
 
             <!-- Пустое состояние -->
@@ -230,7 +230,7 @@
                                  Text="{Binding TaskFilter, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <TextBlock Text="{DynamicResource str_TaskBoard_SearchPlaceholder}"
                                    Margin="7,0,0,0" FontSize="11" VerticalAlignment="Center"
-                                   IsHitTestVisible="False" Opacity="0.6"
+                                   IsHitTestVisible="False" Opacity="{DynamicResource TaskPlaceholderOpacity}"
                                    Foreground="{DynamicResource SecondaryForeground}"
                                    Visibility="{Binding Text, ElementName=FilterBox,
                                                 Converter={StaticResource EmptyToVisTb}}"/>
@@ -366,7 +366,7 @@
                                             <TextBlock Text="{DynamicResource str_TaskBoard_DescriptionHint}"
                                                        Margin="7,0,0,0" FontSize="11"
                                                        VerticalAlignment="Center" IsHitTestVisible="False"
-                                                       Opacity="0.6"
+                                                       Opacity="{DynamicResource TaskPlaceholderOpacity}"
                                                        Foreground="{DynamicResource SecondaryForeground}"
                                                        Visibility="{Binding Text, ElementName=DescBox,
                                                                     Converter={StaticResource EmptyToVisTb}}"/>
@@ -400,7 +400,7 @@
                                         <TextBlock Text="{DynamicResource str_TaskBoard_TrackerPlaceholder}"
                                                    Margin="7,0,0,0" FontSize="11"
                                                    VerticalAlignment="Center" IsHitTestVisible="False"
-                                                   Opacity="0.6"
+                                                   Opacity="{DynamicResource TaskPlaceholderOpacity}"
                                                    Foreground="{DynamicResource SecondaryForeground}"
                                                    Visibility="{Binding Text, ElementName=TrackerBox,
                                                                 Converter={StaticResource EmptyToVisTb}}"/>

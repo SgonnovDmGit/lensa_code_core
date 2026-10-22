@@ -409,4 +409,17 @@
         </Style.Triggers>
     </Style>
 
+    <SolidColorBrush x:Key="AccentTextForeground" Color="#0FA97A"/>
+    <SolidColorBrush x:Key="ErrorTextForeground" Color="#C93C32"/>
+    <SolidColorBrush x:Key="SuccessTextForeground" Color="#0FA97A"/>
+    <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="ComposerPlaceholderOpacity">.7</sys:Double>
+    <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="TaskPlaceholderOpacity">.6</sys:Double>
+    <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="DebugMessageOpacity">.7</sys:Double>
+    <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="SummaryTextOpacity">.85</sys:Double>
+    <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="DangerButtonHoverOpacity">.88</sys:Double>
+    <SolidColorBrush x:Key="PrimaryActionForeground" Color="#FFFFFF"/>
+    <sys:Double xmlns:sys="clr-namespace:System;assembly=mscorlib" x:Key="ActionBadgeOpacity">.85</sys:Double>
+    <SolidColorBrush x:Key="PrimaryActionHoverForeground" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="PrimaryActionPressedForeground" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="DangerButtonHoverBorder" Color="#C93C32"/>
 </ResourceDictionary>

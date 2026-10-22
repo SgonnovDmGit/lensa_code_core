@@ -26,7 +26,7 @@
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="ChipBorder" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentTextForeground}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

@@ -99,13 +99,19 @@ namespace LenSa.Core.Services.Api
             };
         }
 
-        public async Task<bool> CheckHealthAsync()
+        public Task<bool> CheckHealthAsync() => CheckHealthAsync(CancellationToken.None);
+
+        public async Task<bool> CheckHealthAsync(CancellationToken cancellationToken)
         {
             try
             {
                 using var request = CreateRequest(HttpMethod.Get, "/health");
-                using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                using var response = await _http.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
                 return response.IsSuccessStatusCode;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
             }
             catch
             {
@@ -331,10 +337,22 @@ namespace LenSa.Core.Services.Api
             return response;
         }
 
-        public async Task<MeResponse> GetMeAsync()
+        public Task<MeResponse> GetMeAsync() => GetMeAsync(CancellationToken.None);
+
+        public async Task<MeResponse> GetMeAsync(CancellationToken cancellationToken)
         {
             using var request = CreateRequest(HttpMethod.Get, "/v1/api/me");
-            return await SendAsync<MeResponse>(request);
+            return await SendAsync<MeResponse>(request, cancellationToken);
+        }
+
+        /// <summary>Validates a candidate without changing the identity of any other request.</summary>
+        public async Task<MeResponse> ValidateUserKeyAsync(string candidate, CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(candidate)) throw new ArgumentException("Key required", nameof(candidate));
+            using var request = CreateRequest(HttpMethod.Get, "/v1/api/me");
+            request.Headers.Remove("Authorization");
+            request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {candidate.Trim()}");
+            return await SendAsync<MeResponse>(request, cancellationToken);
         }
 
         public async Task<UsageResponse> GetUsageAsync(int page = 1, int size = 50)

@@ -36,13 +36,13 @@
         <Style x:Key="PrimaryButton" TargetType="Button" BasedOn="{StaticResource NormalButton}">
             <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
             <Setter Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
-            <Setter Property="Foreground" Value="{DynamicResource AccentOnFill}"/>
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryActionForeground}"/>
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource AccentHoverColor}"/>
+                    <Setter Property="Background" Value="{DynamicResource AccentHoverColor}"/><Setter Property="Foreground" Value="{DynamicResource PrimaryActionHoverForeground}"/>
                 </Trigger>
                 <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource AccentPressedColor}"/>
+                    <Setter Property="Background" Value="{DynamicResource AccentPressedColor}"/><Setter Property="Foreground" Value="{DynamicResource PrimaryActionPressedForeground}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>
@@ -53,7 +53,7 @@
             <Style.Triggers>
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="{DynamicResource ErrorColor}"/>
-                    <Setter Property="Opacity" Value="0.88"/>
+                    <Setter Property="Opacity" Value="{DynamicResource DangerButtonHoverOpacity}"/><Setter Property="BorderBrush" Value="{DynamicResource DangerButtonHoverBorder}"/>
                 </Trigger>
             </Style.Triggers>
         </Style>

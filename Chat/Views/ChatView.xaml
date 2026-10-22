@@ -40,7 +40,7 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource AccentColor}"/>
-                                <Setter Property="Foreground" Value="{DynamicResource AccentColor}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource AccentTextForeground}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -193,16 +193,16 @@
                     <StackPanel Orientation="Horizontal">
                         <Border Padding="6,2" CornerRadius="3"
                                 Background="{DynamicResource AccentColor}"
-                                Opacity="0.85"
+                                Opacity="{DynamicResource ActionBadgeOpacity}"
                                 Visibility="{Binding IsStreaming, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{DynamicResource str_Chat_Streaming}"
-                                       Foreground="{DynamicResource AccentOnFill}" FontSize="10"/>
+                                       Foreground="{DynamicResource PrimaryActionForeground}" FontSize="10"/>
                         </Border>
                         <Border Margin="8,0,0,0" Padding="6,2" CornerRadius="3"
                                 Background="{DynamicResource ErrorBackground}"
                                 Visibility="{Binding IsInterrupted, Converter={StaticResource BoolToVis}}">
                             <TextBlock Text="{DynamicResource str_Chat_Interrupted}"
-                                       Foreground="{DynamicResource ErrorColor}" FontSize="10"/>
+                                       Foreground="{DynamicResource ErrorTextForeground}" FontSize="10"/>
                         </Border>
                     </StackPanel>
 
@@ -278,7 +278,7 @@
                                                 <!-- failed: ✕ -->
                                                 <TextBlock Text="✕" FontSize="12" FontWeight="Bold"
                                                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource ErrorColor}"
+                                                           Foreground="{DynamicResource ErrorTextForeground}"
                                                            Visibility="{Binding IsFailed, Converter={StaticResource BoolToVis}}"/>
                                             </Grid>
 
@@ -357,7 +357,7 @@
                                                             <Setter Property="Visibility" Value="Collapsed"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding IsFailed}" Value="True">
-                                                            <Setter Property="Foreground" Value="{DynamicResource ErrorColor}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource ErrorTextForeground}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -489,7 +489,7 @@
                     BorderThickness="1"
                     Padding="8,6"
                     Margin="0,4"
-                    Opacity="0.7">
+                    Opacity="{DynamicResource DebugMessageOpacity}">
                 <TextBlock Text="{Binding Content}"
                            FontFamily="Consolas"
                            FontSize="11"
@@ -610,7 +610,7 @@
                                   HorizontalScrollBarVisibility="Disabled"
                                   Visibility="{Binding IsSummaryExpanded, Converter={StaticResource BoolToVis}}"
                                   PreviewMouseWheel="Summary_PreviewMouseWheel">
-                        <TextBlock Text="{Binding Content}" FontSize="11" TextWrapping="Wrap" Opacity="0.85"
+                        <TextBlock Text="{Binding Content}" FontSize="11" TextWrapping="Wrap" Opacity="{DynamicResource SummaryTextOpacity}"
                                    Foreground="{DynamicResource SecondaryForeground}"/>
                     </ScrollViewer>
                 </StackPanel>
@@ -713,17 +713,17 @@
                        Foreground="{DynamicResource SecondaryForeground}"/>
             <StackPanel HorizontalAlignment="Center">
                 <StackPanel Orientation="Horizontal" Margin="0,3">
-                    <TextBlock Text="•" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" Margin="0,0,8,0"/>
+                    <TextBlock Text="•" Foreground="{DynamicResource AccentTextForeground}" FontWeight="Bold" Margin="0,0,8,0"/>
                     <TextBlock Text="{DynamicResource str_Welcome_Hint1}" FontSize="12" TextWrapping="Wrap"
                                Foreground="{DynamicResource SecondaryForeground}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,3">
-                    <TextBlock Text="•" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" Margin="0,0,8,0"/>
+                    <TextBlock Text="•" Foreground="{DynamicResource AccentTextForeground}" FontWeight="Bold" Margin="0,0,8,0"/>
                     <TextBlock Text="{DynamicResource str_Welcome_Hint2}" FontSize="12" TextWrapping="Wrap"
                                Foreground="{DynamicResource SecondaryForeground}"/>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,3">
-                    <TextBlock Text="•" Foreground="{DynamicResource AccentColor}" FontWeight="Bold" Margin="0,0,8,0"/>
+                    <TextBlock Text="•" Foreground="{DynamicResource AccentTextForeground}" FontWeight="Bold" Margin="0,0,8,0"/>
                     <TextBlock Text="{DynamicResource str_Welcome_Hint3}" FontSize="12" TextWrapping="Wrap"
                                Foreground="{DynamicResource SecondaryForeground}"/>
                 </StackPanel>

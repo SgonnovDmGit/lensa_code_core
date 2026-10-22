@@ -258,5 +258,21 @@ namespace LenSa.Core.Services.AppConfig
                 // Ignore save errors silently
             }
         }
+
+        /// <summary>Persists an identity change atomically and reports failure to its caller.</summary>
+        public static void SaveOrThrow(AppConfig config)
+        {
+            Directory.CreateDirectory(ConfigDir);
+            var temporary = ConfigPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                File.WriteAllText(temporary, JsonSerializer.Serialize(config, JsonOptions));
+                File.Move(temporary, ConfigPath, overwrite: true);
+            }
+            finally
+            {
+                if (File.Exists(temporary)) File.Delete(temporary);
+            }
+        }
     }
 }

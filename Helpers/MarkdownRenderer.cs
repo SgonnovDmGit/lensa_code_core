@@ -382,7 +382,7 @@ namespace LenSa.Core.Helpers
             };
             button.SetResourceReference(Control.BackgroundProperty, "SecondaryBackground");
             button.SetResourceReference(Control.BorderBrushProperty, "BorderColor");
-            button.SetResourceReference(Control.ForegroundProperty, "AccentColor");
+            button.SetResourceReference(Control.ForegroundProperty, "AccentTextForeground");
 
             button.PreviewMouseLeftButtonDown += (_, e) =>
             {

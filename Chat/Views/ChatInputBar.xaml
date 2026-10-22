@@ -31,6 +31,10 @@
         <helpers:ReasoningNameConverter x:Key="ReasoningName"/>
         <helpers:AssistModeNameConverter x:Key="AssistModeName"/>
 
+        <Geometry x:Key="ModePlanningGlyph">M14 3H5a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6 M8 7h5 M8 11h3 M12 18l3.5-.8 6.2-6.2-2.7-2.7-6.2 6.2z M18 9.6l2.7 2.7</Geometry>
+        <Geometry x:Key="ModeReviewGlyph">M16.5 10A6.5 6.5 0 1 1 3.5 10A6.5 6.5 0 1 1 16.5 10 M15 15l6 6</Geometry>
+        <Geometry x:Key="ModeAutoGlyph">m11 17 2 2a1 1 0 1 0 3-3 m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4 m21 3 1 11h-2 M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3 M3 4h8</Geometry>
+
         <!-- Чип: кликабелен без каретки — рука + подсветка (решение по мокапу) -->
         <Style x:Key="ChipToggle" TargetType="ToggleButton">
             <Setter Property="Cursor" Value="Hand"/>
@@ -70,7 +74,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Opacity" Value="0.85"/>
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{DynamicResource PrimaryForeground}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -125,7 +129,7 @@
                              горячие клавиши (задачу уже описали, повторять незачем). -->
                         <TextBlock IsHitTestVisible="False"
                                    Foreground="{DynamicResource SecondaryForeground}"
-                                   FontStyle="Italic" FontSize="11.5" Opacity="0.7"
+                                   x:Name="InputPlaceholder" FontStyle="Italic" FontSize="11.5" Opacity="{DynamicResource ComposerPlaceholderOpacity}"
                                    TextTrimming="CharacterEllipsis" Margin="10,0"
                                    HorizontalAlignment="Center" VerticalAlignment="Center"
                                    Visibility="{Binding Text, ElementName=InputTextBox, Converter={StaticResource EmptyToVis}}">
@@ -145,25 +149,27 @@
                     <!-- ===== Нижняя кромка поля: модель+размышления · контекст · режим · отправка ===== -->
                     <Grid Grid.Row="1" Margin="7,4,7,7">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="0"/>
+                            <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
 
+                        <Grid Grid.Column="0" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                         <!-- === Чип модели: открывает меню «модель + размышления» === -->
                         <ToggleButton x:Name="ModelChip" Grid.Column="0"
                                       Style="{StaticResource ChipToggle}"
                                       ToolTip="{DynamicResource str_ModelAndReasoning}">
-                            <StackPanel Orientation="Horizontal">
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                                 <TextBlock Text="{Binding ProjectSettings.SelectedModel.Name}"
                                            FontSize="11" MaxWidth="150"
                                            TextTrimming="CharacterEllipsis"
                                            VerticalAlignment="Center"
                                            Foreground="{DynamicResource PrimaryForeground}"/>
                                 <!-- Уровень размышлений наружу = только цветной кружок -->
-                                <Ellipse Width="9" Height="9" Margin="6,0,0,0" VerticalAlignment="Center">
+                                <Ellipse Grid.Column="1" Width="9" Height="9" Margin="6,0,0,0" VerticalAlignment="Center">
                                     <Ellipse.Style>
                                         <Style TargetType="Ellipse">
                                             <Setter Property="Fill" Value="{DynamicResource ReasoningOff}"/>
@@ -230,7 +236,7 @@
                                         </ToolTip>
                                     </Ellipse.ToolTip>
                                 </Ellipse>
-                            </StackPanel>
+                            </Grid>
                         </ToggleButton>
 
                         <!-- Меню раскрывается ВВЕРХ -->
@@ -390,7 +396,7 @@
                                                             <Setter Property="Foreground" Value="{DynamicResource ReasoningForeground}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding ActiveChat.ContextFillPercent, Converter={StaticResource CtxZone}}" Value="crit">
-                                                            <Setter Property="Foreground" Value="{DynamicResource ErrorColor}"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource ErrorTextForeground}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -417,6 +423,8 @@
                             </Button.ToolTip>
                         </Button>
 
+                        </Grid>
+
                         <!-- === Счётчик длины сообщения (T-000163, ANNOUNCE-002) ===
                              Появляется только с 90% лимита: висеть всё время он не должен —
                              обычное сообщение короче в сотни раз, и постоянный счётчик был бы
@@ -436,7 +444,7 @@
                                     <Setter Property="Foreground" Value="{DynamicResource SecondaryForeground}"/>
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding ActiveChat.IsInputOverLimit}" Value="True">
-                                            <Setter Property="Foreground" Value="{DynamicResource ErrorColor}"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource ErrorTextForeground}"/>
                                             <Setter Property="FontWeight" Value="SemiBold"/>
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -476,15 +484,29 @@
                                     </Style.Triggers>
                                 </Style>
                             </ToggleButton.Style>
-                            <TextBlock Text="{Binding ProjectSettings.AssistMode, Converter={StaticResource AssistModeName}, Mode=OneWay}"
-                                       Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Viewbox Width="16" Height="16" Margin="0,0,6,0"><Canvas Width="24" Height="24">
+                                    <Path Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"
+                                          StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round">
+                                        <Path.Style><Style TargetType="Path">
+                                            <Setter Property="Data" Value="{StaticResource ModeAutoGlyph}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ProjectSettings.AssistMode}" Value="planning"><Setter Property="Data" Value="{StaticResource ModePlanningGlyph}"/></DataTrigger>
+                                                <DataTrigger Binding="{Binding ProjectSettings.AssistMode}" Value="review"><Setter Property="Data" Value="{StaticResource ModeReviewGlyph}"/></DataTrigger>
+                                            </Style.Triggers>
+                                        </Style></Path.Style>
+                                    </Path>
+                                </Canvas></Viewbox>
+                                <TextBlock Text="{Binding ProjectSettings.AssistMode, Converter={StaticResource AssistModeName}, Mode=OneWay}"
+                                           Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ToggleButton}}"/>
+                            </StackPanel>
                         </ToggleButton>
 
                         <Popup IsOpen="{Binding IsChecked, ElementName=ModeChip, Mode=TwoWay}"
                                PlacementTarget="{Binding ElementName=ModeChip}"
                                Placement="Top" VerticalOffset="-6"
                                StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
-                            <Border Style="{StaticResource PopupCard}" MinWidth="230">
+                            <Border Style="{StaticResource PopupCard}" Width="290">
                                 <StackPanel>
                                     <TextBlock Text="{DynamicResource str_Mode}" Style="{StaticResource PopupHead}"/>
                                     <RadioButton GroupName="ModeMenu" Tag="planning" Click="ModeItem_Click"
@@ -493,11 +515,13 @@
                                             <ControlTemplate TargetType="RadioButton">
                                                 <Border x:Name="bd" Background="Transparent" CornerRadius="6" Padding="8,6" Cursor="Hand">
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Rectangle Width="11" Height="11" RadiusX="3" RadiusY="3"
-                                                                   Fill="{DynamicResource ModePlanning}" VerticalAlignment="Center"/>
+                                                        <Viewbox Width="21" Height="21" VerticalAlignment="Center"><Canvas Width="24" Height="24">
+                                                            <Path Data="{StaticResource ModePlanningGlyph}" Stroke="{DynamicResource ModePlanning}"
+                                                                  StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                        </Canvas></Viewbox>
                                                         <StackPanel Margin="8,0,0,0">
-                                                            <TextBlock Text="{DynamicResource str_ModePlanning}" FontSize="12" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="{DynamicResource str_ModePlanningHint}" FontSize="10.5"
+                                                            <TextBlock Text="{DynamicResource str_ModePlanning}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryForeground}"/>
+                                                            <TextBlock Text="{DynamicResource str_ModePlanningHint}" FontSize="10.5" TextWrapping="Wrap" MaxWidth="220"
                                                                        Foreground="{DynamicResource SecondaryForeground}"/>
                                                         </StackPanel>
                                                     </StackPanel>
@@ -520,11 +544,13 @@
                                             <ControlTemplate TargetType="RadioButton">
                                                 <Border x:Name="bd" Background="Transparent" CornerRadius="6" Padding="8,6" Cursor="Hand">
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Rectangle Width="11" Height="11" RadiusX="3" RadiusY="3"
-                                                                   Fill="{DynamicResource ModeReview}" VerticalAlignment="Center"/>
+                                                        <Viewbox Width="21" Height="21" VerticalAlignment="Center"><Canvas Width="24" Height="24">
+                                                            <Path Data="{StaticResource ModeReviewGlyph}" Stroke="{DynamicResource ModeReview}"
+                                                                  StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                        </Canvas></Viewbox>
                                                         <StackPanel Margin="8,0,0,0">
-                                                            <TextBlock Text="{DynamicResource str_ModeReview}" FontSize="12" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="{DynamicResource str_ModeReviewHint}" FontSize="10.5"
+                                                            <TextBlock Text="{DynamicResource str_ModeReview}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryForeground}"/>
+                                                            <TextBlock Text="{DynamicResource str_ModeReviewHint}" FontSize="10.5" TextWrapping="Wrap" MaxWidth="220"
                                                                        Foreground="{DynamicResource SecondaryForeground}"/>
                                                         </StackPanel>
                                                     </StackPanel>
@@ -547,11 +573,13 @@
                                             <ControlTemplate TargetType="RadioButton">
                                                 <Border x:Name="bd" Background="Transparent" CornerRadius="6" Padding="8,6" Cursor="Hand">
                                                     <StackPanel Orientation="Horizontal">
-                                                        <Rectangle Width="11" Height="11" RadiusX="3" RadiusY="3"
-                                                                   Fill="{DynamicResource ModeAuto}" VerticalAlignment="Center"/>
+                                                        <Viewbox Width="21" Height="21" VerticalAlignment="Center"><Canvas Width="24" Height="24">
+                                                            <Path Data="{StaticResource ModeAutoGlyph}" Stroke="{DynamicResource ModeAuto}"
+                                                                  StrokeThickness="1.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                                        </Canvas></Viewbox>
                                                         <StackPanel Margin="8,0,0,0">
-                                                            <TextBlock Text="{DynamicResource str_ModeAuto}" FontSize="12" FontWeight="SemiBold"/>
-                                                            <TextBlock Text="{DynamicResource str_ModeAutoHint}" FontSize="10.5"
+                                                            <TextBlock Text="{DynamicResource str_ModeAuto}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource PrimaryForeground}"/>
+                                                            <TextBlock Text="{DynamicResource str_ModeAutoHint}" FontSize="10.5" TextWrapping="Wrap" MaxWidth="220"
                                                                        Foreground="{DynamicResource SecondaryForeground}"/>
                                                         </StackPanel>
                                                     </StackPanel>
