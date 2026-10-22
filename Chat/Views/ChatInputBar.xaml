@@ -33,7 +33,7 @@
 
         <Geometry x:Key="ModePlanningGlyph">M14 3H5a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-6 M8 7h5 M8 11h3 M12 18l3.5-.8 6.2-6.2-2.7-2.7-6.2 6.2z M18 9.6l2.7 2.7</Geometry>
         <Geometry x:Key="ModeReviewGlyph">M16.5 10A6.5 6.5 0 1 1 3.5 10A6.5 6.5 0 1 1 16.5 10 M15 15l6 6</Geometry>
-        <Geometry x:Key="ModeAutoGlyph">m11 17 2 2a1 1 0 1 0 3-3 m14 14 2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4 m21 3 1 11h-2 M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3 M3 4h8</Geometry>
+        <Geometry x:Key="ModeAutoGlyph">M11 17l2 2a1 1 0 1 0 3-3 M14 14l2.5 2.5a1 1 0 1 0 3-3l-3.88-3.88a3 3 0 0 0-4.24 0l-.88.88a1 1 0 1 1-3-3l2.81-2.81a5.79 5.79 0 0 1 7.06-.87l.47.28a2 2 0 0 0 1.42.25L21 4 M21 3l1 11h-2 M3 3 2 14l6.5 6.5a1 1 0 1 0 3-3 M3 4h8</Geometry>
 
         <!-- Чип: кликабелен без каретки — рука + подсветка (решение по мокапу) -->
         <Style x:Key="ChipToggle" TargetType="ToggleButton">
@@ -250,62 +250,27 @@
                                     <!-- Выбор модели закрывает меню: клик по элементу ВНУТРИ Popup —
                                          не «клик мимо», и StaysOpen=False его не ловит. -->
                                     <ListBox ItemsSource="{Binding ProjectSettings.Models}"
+                                             ItemContainerStyle="{DynamicResource ModelPickerItemStyle}"
                                              SelectedItem="{Binding ProjectSettings.SelectedModel}"
                                              SelectionChanged="ModelList_SelectionChanged"
                                              MaxHeight="260" BorderThickness="0"
                                              Background="Transparent"
                                              ScrollViewer.HorizontalScrollBarVisibility="Disabled">
-                                        <ListBox.ItemContainerStyle>
-                                            <Style TargetType="ListBoxItem">
-                                                <Setter Property="Padding" Value="8,5"/>
-                                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                                                <Style.Triggers>
-                                                    <!-- Модели, в которые диалог уже не влезает, — задизейблены -->
-                                                    <DataTrigger Value="False">
-                                                        <DataTrigger.Binding>
-                                                            <MultiBinding Converter="{StaticResource ModelFits}">
-                                                                <Binding Path="ContextLength"/>
-                                                                <Binding Path="DataContext.ActiveChat.ContextTokens"
-                                                                         RelativeSource="{RelativeSource AncestorType=UserControl}"/>
-                                                            </MultiBinding>
-                                                        </DataTrigger.Binding>
-                                                        <Setter Property="IsEnabled" Value="False"/>
-                                                        <Setter Property="Opacity" Value="0.45"/>
-                                                        <Setter Property="ToolTip" Value="{DynamicResource str_ModelTooSmall}"/>
-                                                        <Setter Property="ToolTipService.ShowOnDisabled" Value="True"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </ListBox.ItemContainerStyle>
+
                                         <ListBox.ItemTemplate>
                                             <DataTemplate>
                                                 <DockPanel>
                                                     <TextBlock DockPanel.Dock="Right" Text="{Binding DisplayPrice}"
                                                                FontSize="10.5" Margin="10,0,0,0"
                                                                VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource SecondaryForeground}"/>
+                                                               Style="{DynamicResource ModelPickerMetaStyle}"/>
                                                     <TextBlock DockPanel.Dock="Right" Text="{Binding DisplayContext}"
                                                                FontSize="10.5" Margin="10,0,0,0"
                                                                VerticalAlignment="Center"
-                                                               Foreground="{DynamicResource SecondaryForeground}"/>
+                                                               Style="{DynamicResource ModelPickerMetaStyle}"/>
                                                     <TextBlock Text="{Binding Name}" FontSize="12"
-                                                               TextTrimming="CharacterEllipsis"
-                                                               VerticalAlignment="Center">
-                                                        <TextBlock.Style>
-                                                            <Style TargetType="TextBlock">
-                                                                <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}"/>
-                                                                <Style.Triggers>
-                                                                    <MultiDataTrigger>
-                                                                        <MultiDataTrigger.Conditions>
-                                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=IsSelected}" Value="True"/>
-                                                                            <Condition Binding="{Binding RelativeSource={RelativeSource AncestorType=ListBoxItem}, Path=(Selector.IsSelectionActive)}" Value="True"/>
-                                                                        </MultiDataTrigger.Conditions>
-                                                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.HighlightTextBrushKey}}"/>
-                                                                    </MultiDataTrigger>
-                                                                </Style.Triggers>
-                                                            </Style>
-                                                        </TextBlock.Style>
-                                                    </TextBlock>
+                                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                                               Style="{DynamicResource ModelPickerNameStyle}"/>
                                                 </DockPanel>
                                             </DataTemplate>
                                         </ListBox.ItemTemplate>
