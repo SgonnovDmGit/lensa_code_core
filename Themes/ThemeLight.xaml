@@ -423,4 +423,8 @@
     <SolidColorBrush x:Key="PrimaryActionHoverForeground" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="PrimaryActionPressedForeground" Color="#FFFFFF"/>
     <SolidColorBrush x:Key="DangerButtonHoverBorder" Color="#C93C32"/>
+    <SolidColorBrush x:Key="DangerActionBackground" Color="#C93C32"/>
+    <SolidColorBrush x:Key="DangerActionHoverBackground" Color="#C93C32"/>
+    <SolidColorBrush x:Key="DangerActionPressedBackground" Color="#C93C32"/>
+    <SolidColorBrush x:Key="DangerActionForeground" Color="#FFFFFF"/>
 </ResourceDictionary>
