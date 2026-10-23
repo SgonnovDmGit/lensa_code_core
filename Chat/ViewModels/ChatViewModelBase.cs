@@ -1319,14 +1319,17 @@ namespace LenSa.Core.Chat.ViewModels
                 // Врезаем в ПЕРВОЕ сообщение нового диалога, а не отдельным ходом: лишний ход —
                 // это лишние деньги, а весь смысл переноса в том, чтобы холодный старт был дешёвым.
                 var outgoing = message;
-                if (_boardCarriedOver && TaskBoard.Count > 0)
+                var carriesBoard = _boardCarriedOver && TaskBoard.Count > 0;
+                if (carriesBoard)
                 {
                     outgoing = BuildBoardHandoff() + "\n\n" + message;
-                    _boardCarriedOver = false;
                 }
 
                 var request = await BuildRequestAsync(outgoing, promptCode, cts.Token);
                 cts.Token.ThrowIfCancellationRequested();
+                // A canceled/failed preparation never reaches HTTP. Keep the board
+                // handoff pending for the next actual send rather than consuming it early.
+                if (carriesBoard) _boardCarriedOver = false;
                 var response = await Api.SendChatAsyncAsync(request, cancellationToken: cts.Token);
                 cts.Token.ThrowIfCancellationRequested();
 
