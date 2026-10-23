@@ -1286,6 +1286,15 @@ namespace LenSa.Core.Chat.ViewModels
         protected abstract ChatRequest BuildRequest(string message, string promptCode);
 
         /// <summary>
+        /// Allows a consumer to collect transient context asynchronously before the first HTTP request.
+        /// The default preserves existing synchronous builders and performs no additional work.
+        /// Overrides return a request owned by this send; cancellation remains part of the send lifetime.
+        /// </summary>
+        protected virtual Task<ChatRequest> BuildRequestAsync(
+            string message, string promptCode, CancellationToken cancellationToken) =>
+            Task.FromResult(BuildRequest(message, promptCode));
+
+        /// <summary>
         /// Публичный API для наследника — отправить сообщение с промпт-кодом.
         /// Добавляет user-message в коллекцию, ставит IsBusy, зовёт API, обрабатывает ответ.
         /// </summary>
@@ -1316,7 +1325,8 @@ namespace LenSa.Core.Chat.ViewModels
                     _boardCarriedOver = false;
                 }
 
-                var request = BuildRequest(outgoing, promptCode);
+                var request = await BuildRequestAsync(outgoing, promptCode, cts.Token);
+                cts.Token.ThrowIfCancellationRequested();
                 var response = await Api.SendChatAsyncAsync(request, cancellationToken: cts.Token);
                 cts.Token.ThrowIfCancellationRequested();
 
