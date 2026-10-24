@@ -47,9 +47,14 @@ public static class WindowCaptionTheme
     }
 
     // Own windows carry no small mark in the system caption (T-000425): the brand lives in the
-    // main window's header. A window shown in the taskbar keeps its big icon there.
+    // main window's header. A window shown in the taskbar keeps its big icon there, and the caption
+    // drew it scaled down without a small one, so the caption is told not to draw any icon.
     private static void HideCaptionIcon(IntPtr hwnd, bool keepTaskbarIcon)
     {
+        var options = new WtaOptions { Flags = WtncaNoDrawIcon, Mask = WtncaNoDrawIcon };
+        try { _ = SetWindowThemeAttribute(hwnd, WtaNonClient, ref options, (uint)Marshal.SizeOf<WtaOptions>()); }
+        catch (DllNotFoundException) { }
+        catch (EntryPointNotFoundException) { }
         var style = GetWindowLongPtr(hwnd, GwlExStyle).ToInt64();
         if ((style & WsExDlgModalFrame) == 0)
             SetWindowLongPtr(hwnd, GwlExStyle, new IntPtr(style | WsExDlgModalFrame));
@@ -59,6 +64,8 @@ public static class WindowCaptionTheme
         SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, SwpNoSize | SwpNoMove | SwpNoZOrder | SwpNoActivate | SwpFrameChanged);
     }
 
+    private const int WtaNonClient = 1;
+    private const uint WtncaNoDrawIcon = 0x0002;
     private const int GwlExStyle = -20;
     private const long WsExDlgModalFrame = 0x0001;
     private const int WmSetIcon = 0x0080;
@@ -128,6 +135,12 @@ public static class WindowCaptionTheme
 
     [DllImport("user32.dll")]
     private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int cx, int cy, uint flags);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct WtaOptions { public uint Flags; public uint Mask; }
+
+    [DllImport("uxtheme.dll", ExactSpelling = true)]
+    private static extern int SetWindowThemeAttribute(IntPtr hwnd, int attribute, ref WtaOptions options, uint size);
 
     [DllImport("dwmapi.dll", ExactSpelling = true)]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);

@@ -697,8 +697,32 @@
                     </Style.Triggers>
                 </Style>
             </StackPanel.Style>
-            <!-- Брендовый знак: мятное кольцо с точкой (перекликается с кружком контекста) -->
+            <!-- Логотип продукта (AppLogoSource из темы продукта, смок 25.10). Продукт без него
+                 получает прежний знак: кольцо с точкой, перекликается с кружком контекста. -->
+            <Image x:Name="WelcomeLogo" Source="{DynamicResource AppLogoSource}"
+                   Width="96" Height="96" Margin="0,0,0,18" HorizontalAlignment="Center"
+                   RenderOptions.BitmapScalingMode="HighQuality">
+                <Image.Style>
+                    <Style TargetType="Image">
+                        <Style.Triggers>
+                            <Trigger Property="Source" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
             <Grid Width="56" Height="56" Margin="0,0,0,18" HorizontalAlignment="Center">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Source, ElementName=WelcomeLogo}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
                 <Ellipse Stroke="{DynamicResource AccentColor}" StrokeThickness="4" Opacity="0.9"/>
                 <Ellipse Width="12" Height="12" Fill="{DynamicResource AccentColor}"
                          HorizontalAlignment="Center" VerticalAlignment="Center"/>
