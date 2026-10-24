@@ -397,14 +397,43 @@
         <Setter Property="Background" Value="{DynamicResource MenuBackground}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}"/>
+        <!-- Свой шаблон без колонки значков: системная колонка оставалась светлой в тёмной теме -->
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ContextMenu">
+                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1" Padding="0,4" SnapsToDevicePixels="True">
+                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- MenuItem -->
     <Style TargetType="MenuItem">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{DynamicResource PrimaryForeground}"/>
-        <Setter Property="Padding" Value="8,4"/>
+        <Setter Property="Padding" Value="14,6"/>
         <Setter Property="FontSize" Value="13"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="MenuItem">
+                    <Border x:Name="MenuItemBorder" Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                        <ContentPresenter ContentSource="Header" RecognizesAccessKey="True" VerticalAlignment="Center"/>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="MenuItemBorder" Property="Background" Value="{DynamicResource MenuHoverBackground}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Foreground" Value="{DynamicResource SecondaryForeground}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
         <Style.Triggers>
             <Trigger Property="IsHighlighted" Value="True">
                 <Setter Property="Background" Value="{DynamicResource MenuHoverBackground}"/>
