@@ -300,9 +300,6 @@
                                         <Trigger Property="IsMouseOver" Value="True">
                                             <Setter TargetName="RingHover" Property="Background" Value="{DynamicResource HoverBackground}"/>
                                         </Trigger>
-                                        <Trigger Property="IsEnabled" Value="False">
-                                            <Setter TargetName="RingHover" Property="Opacity" Value="0.4"/>
-                                        </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
                             </Button.Template>
@@ -310,8 +307,10 @@
                             <!-- Фон и дуга — ОДНО кольцо двумя примитивами (T-000165).
                                  23.2 = 2*R + StrokeThickness при R=10 из PercentToArcConverter;
                                  центр обоих = 12. Меняешь одно — меняй и конвертер. -->
-                            <Ellipse Stroke="{DynamicResource BorderColor}" StrokeThickness="3.2"
-                                     Width="23.2" Height="23.2" Opacity="0.7"/>
+                            <!-- Свой токен фона: BorderColor совпадал с композером в тёмной теме продукта,
+                                 и пустое кольцо исчезало (T-000426). Контраст к композеру ≥ 3:1 во всех темах. -->
+                            <Ellipse Stroke="{DynamicResource ContextTrackColor}" StrokeThickness="3.2"
+                                     Width="23.2" Height="23.2"/>
                             <!-- Явные размеры + Stretch=None: иначе WPF выравнивает Path по его
                                  собственным габаритам и добавляет свой сдвиг поверх координат. -->
                             <Path StrokeThickness="3.2" Width="24" Height="24" Stretch="None"
@@ -322,6 +321,11 @@
                                     <Style TargetType="Path">
                                         <Setter Property="Stroke" Value="{DynamicResource ContextOkColor}"/>
                                         <Style.Triggers>
+                                            <!-- Недоступность гасит только дугу. Пустой диалог недоступен всегда
+                                                 (сжимать нечего), и приглушённый фон снова пропадал (T-000426). -->
+                                            <DataTrigger Binding="{Binding IsEnabled, RelativeSource={RelativeSource AncestorType=Button}}" Value="False">
+                                                <Setter Property="Opacity" Value="0.4"/>
+                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding ActiveChat.ContextFillPercent, Converter={StaticResource CtxZone}}" Value="warn">
                                                 <Setter Property="Stroke" Value="{DynamicResource ReasoningForeground}"/>
                                             </DataTrigger>
@@ -350,7 +354,20 @@
                                              контекст раньше, чем окно кончится, и пользователю важна та точка,
                                              где он реально начнёт резать. Строка от contextLength показывала «—»:
                                              окно каталогу неизвестно у всех моделей на проде (T-000161). -->
-                                        <DockPanel Margin="0,2"><TextBlock Text="{DynamicResource str_CtxTooltipWindow}" Foreground="{DynamicResource SecondaryForeground}" FontSize="12"/><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding ActiveChat.ContextLimitDisplay}" FontSize="12" Margin="12,0,0,0"/></DockPanel>
+                                        <!-- В пустом диалоге хода ещё нет, и предел — окно модели из каталога, а не порог
+                                             сжатия: подпись другая, чтобы два разных числа не выдавались за одно (T-000427). -->
+                                        <DockPanel Margin="0,2"><TextBlock Foreground="{DynamicResource SecondaryForeground}" FontSize="12">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="{DynamicResource str_CtxTooltipWindow}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding ActiveChat.IsContextLimitModelWindow}" Value="True">
+                                                            <Setter Property="Text" Value="{DynamicResource str_CtxTooltipModelWindow}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock><TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right" Text="{Binding ActiveChat.ContextLimitDisplay}" FontSize="12" Margin="12,0,0,0"/></DockPanel>
                                         <DockPanel Margin="0,2">
                                             <DockPanel.Resources>
                                                 <Style x:Key="ZoneText" TargetType="TextBlock">
@@ -367,9 +384,20 @@
                                                 </Style>
                                             </DockPanel.Resources>
                                             <TextBlock Style="{StaticResource ZoneText}" Text="{DynamicResource str_CtxTooltipFill}"/>
-                                            <TextBlock Style="{StaticResource ZoneText}" DockPanel.Dock="Right" HorizontalAlignment="Right"
-                                                       Text="{Binding ActiveChat.ContextFillPercent, StringFormat={}{0:F0}%}"
-                                                       FontWeight="SemiBold" Margin="12,0,0,0"/>
+                                            <TextBlock DockPanel.Dock="Right" HorizontalAlignment="Right"
+                                                       FontWeight="SemiBold" Margin="12,0,0,0">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock" BasedOn="{StaticResource ZoneText}">
+                                                        <Setter Property="Text" Value="{Binding ActiveChat.ContextFillPercent, StringFormat={}{0:F0}%}"/>
+                                                        <Style.Triggers>
+                                                            <!-- Окно неизвестно: «0 %» выдавал бы 0 за реальную ёмкость. -->
+                                                            <DataTrigger Binding="{Binding ActiveChat.IsContextLimitUnknown}" Value="True">
+                                                                <Setter Property="Text" Value="—"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
                                         </DockPanel>
                                         <Border BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0"
                                                 Margin="0,7,0,0" Padding="0,6,0,0">
@@ -572,17 +600,20 @@
                                     Visibility="{Binding ActiveChat.IsBusy, Converter={StaticResource InvBoolToVis}}">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
-                                        <Border x:Name="bd" Background="{DynamicResource AccentColor}" CornerRadius="8">
-                                            <Path Width="15" Height="15" Stretch="Uniform"
-                                                  Fill="{DynamicResource AccentOnFill}"
-                                                  Data="M2.4 21.6 22.8 12 2.4 2.4 2.4 9.9 17 12 2.4 14.1Z"/>
+                                        <!-- Стрелка вверх, как в агентском кодинге (T-000429). Цвет — свои токены:
+                                             тема может отличать кнопку от акцента (в 1С продукта она малиновая). -->
+                                        <Border x:Name="bd" Background="{DynamicResource SendButtonBackground}" CornerRadius="8">
+                                            <Path Width="16" Height="16" Stretch="Uniform"
+                                                  Stroke="{DynamicResource SendButtonForeground}" StrokeThickness="2.6"
+                                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"
+                                                  Data="M12 20V5 M5.5 11.5 12 5 18.5 11.5"/>
                                         </Border>
                                         <ControlTemplate.Triggers>
                                             <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource AccentHoverColor}"/>
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource SendButtonHoverBackground}"/>
                                             </Trigger>
                                             <Trigger Property="IsPressed" Value="True">
-                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource AccentPressedColor}"/>
+                                                <Setter TargetName="bd" Property="Background" Value="{DynamicResource SendButtonPressedBackground}"/>
                                             </Trigger>
                                             <Trigger Property="IsEnabled" Value="False">
                                                 <Setter Property="Opacity" Value="0.45"/>

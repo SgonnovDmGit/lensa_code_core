@@ -203,4 +203,22 @@
     <sys:String x:Key="str_Dialog_Ok">ОК</sys:String>
     <sys:String x:Key="str_GetKeyLink">Как получить ключ</sys:String>
     <sys:String x:Key="str_OpenLinkFailed">Не удалось открыть страницу.</sys:String>
+
+    <!-- Композер ядра: подписи режима, модели и подсказки кольца (перенесены из продукта 24.10, общий композер с Universal) -->
+    <sys:String x:Key="str_Model">Модель ИИ</sys:String>
+    <sys:String x:Key="str_Mode">Режим</sys:String>
+    <sys:String x:Key="str_ModePlanning">План</sys:String>
+    <sys:String x:Key="str_ModeAuto">Доверие</sys:String>
+    <sys:String x:Key="str_ModeReview">Ревью</sys:String>
+    <sys:String x:Key="str_ModePlanningHint">Только строит план</sys:String>
+    <sys:String x:Key="str_ModeReviewHint">Просмотр, рекомендации и правки в песочнице</sys:String>
+    <sys:String x:Key="str_ModeAutoHint">ИИ все делает сам</sys:String>
+    <sys:String x:Key="str_ModelAndReasoning">Модель ИИ и уровень размышлений</sys:String>
+    <sys:String x:Key="str_Reasoning">Размышления</sys:String>
+    <sys:String x:Key="str_CtxTooltipUsed">Контекст</sys:String>
+    <sys:String x:Key="str_CtxTooltipWindow">Доступно</sys:String>
+    <sys:String x:Key="str_CtxTooltipFill">Заполнение</sys:String>
+    <sys:String x:Key="str_CtxTooltipModelWindow">Окно модели</sys:String>
+    <sys:String x:Key="str_CtxTooltipUnknown">неизвестно</sys:String>
+
 </ResourceDictionary>

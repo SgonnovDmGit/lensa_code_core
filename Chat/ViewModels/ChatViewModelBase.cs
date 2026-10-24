@@ -234,6 +234,15 @@ namespace LenSa.Core.Chat.ViewModels
         /// <summary>Whether the current session has a server-provided context snapshot.</summary>
         public virtual bool HasContextFill => false;
 
+        /// <summary>
+        /// The ring's limit is the model window from the catalog (no turn snapshot yet),
+        /// not the compaction threshold — the tooltip labels the two differently.
+        /// </summary>
+        public virtual bool IsContextLimitModelWindow => false;
+
+        /// <summary>No limit is known at all; the tooltip shows a dash instead of 0 %.</summary>
+        public virtual bool IsContextLimitUnknown => false;
+
         /// <summary>Consumers without a context snapshot cannot start a paid compaction.</summary>
         protected virtual bool CanCompactContext => HasContextFill;
 

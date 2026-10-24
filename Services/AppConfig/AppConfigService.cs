@@ -73,6 +73,11 @@ namespace LenSa.Core.Services.AppConfig
         [JsonPropertyName("knownBases")]
         public System.Collections.Generic.List<string> KnownBases { get; set; } = new();
 
+        // 1С-клиент: базы, скрытые пользователем из сайдбара («key|name|path», T-000428) — скан их не
+        // добавляет, пока не вернут; Universal игнорирует. Старый клиент поле не читает.
+        [JsonPropertyName("hiddenBases")]
+        public System.Collections.Generic.List<string> HiddenBases { get; set; } = new();
+
         // 1С-клиент: BaseKey выбранного конфигуратора — восстановление выбора при старте
         // мгновенно, до фонового скана процессов (смок 07.07); Universal игнорирует.
         [JsonPropertyName("selectedBaseKey")]

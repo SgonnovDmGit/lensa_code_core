@@ -46,6 +46,26 @@ public static class WindowCaptionTheme
         catch (EntryPointNotFoundException) { }
     }
 
+    // Own windows carry no small mark in the system caption (T-000425): the brand lives in the
+    // main window's header. A window shown in the taskbar keeps its big icon there.
+    private static void HideCaptionIcon(IntPtr hwnd, bool keepTaskbarIcon)
+    {
+        var style = GetWindowLongPtr(hwnd, GwlExStyle).ToInt64();
+        if ((style & WsExDlgModalFrame) == 0)
+            SetWindowLongPtr(hwnd, GwlExStyle, new IntPtr(style | WsExDlgModalFrame));
+        SendMessage(hwnd, WmSetIcon, new IntPtr(IconSmall), IntPtr.Zero);
+        if (!keepTaskbarIcon)
+            SendMessage(hwnd, WmSetIcon, new IntPtr(IconBig), IntPtr.Zero);
+        SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0, SwpNoSize | SwpNoMove | SwpNoZOrder | SwpNoActivate | SwpFrameChanged);
+    }
+
+    private const int GwlExStyle = -20;
+    private const long WsExDlgModalFrame = 0x0001;
+    private const int WmSetIcon = 0x0080;
+    private const int IconSmall = 0;
+    private const int IconBig = 1;
+    private const uint SwpNoSize = 0x0001, SwpNoMove = 0x0002, SwpNoZOrder = 0x0004, SwpNoActivate = 0x0010, SwpFrameChanged = 0x0020;
+
     private sealed class Attachment
     {
         private readonly Window _window;
@@ -70,6 +90,7 @@ public static class WindowCaptionTheme
                 _window.TryFindResource("TitleBarForeground") is not SolidColorBrush foreground)
                 return;
 
+            HideCaptionIcon(hwnd, _window.ShowInTaskbar);
             var dark = IsDark(background.Color) ? 1 : 0;
             var caption = ToColorRef(background.Color);
             var text = ToColorRef(foreground.Color);
@@ -95,6 +116,18 @@ public static class WindowCaptionTheme
             _window.Closed -= OnClosed;
         }
     }
+
+    [DllImport("user32.dll", EntryPoint = "GetWindowLongPtrW")]
+    private static extern IntPtr GetWindowLongPtr(IntPtr hwnd, int index);
+
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW")]
+    private static extern IntPtr SetWindowLongPtr(IntPtr hwnd, int index, IntPtr value);
+
+    [DllImport("user32.dll", EntryPoint = "SendMessageW")]
+    private static extern IntPtr SendMessage(IntPtr hwnd, int message, IntPtr wParam, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr hwnd, IntPtr insertAfter, int x, int y, int cx, int cy, uint flags);
 
     [DllImport("dwmapi.dll", ExactSpelling = true)]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);

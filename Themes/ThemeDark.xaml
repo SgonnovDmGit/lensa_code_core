@@ -33,6 +33,13 @@
 
     <!-- Product-overridable chat surfaces; defaults preserve the Core palette. -->
     <SolidColorBrush x:Key="ContextOkColor" Color="#6EE7BE"/>
+    <!-- Фон кольца контекста: контраст к ComposerBackground не ниже 3:1 (T-000426) -->
+    <SolidColorBrush x:Key="ContextTrackColor" Color="#5A6876"/>
+    <!-- Кнопка отправки — свои токены, тема может отличать её от акцента (T-000429) -->
+    <SolidColorBrush x:Key="SendButtonBackground" Color="#6EE7BE"/>
+    <SolidColorBrush x:Key="SendButtonHoverBackground" Color="#8FF0CE"/>
+    <SolidColorBrush x:Key="SendButtonPressedBackground" Color="#5AD5AA"/>
+    <SolidColorBrush x:Key="SendButtonForeground" Color="#10161D"/>
     <SolidColorBrush x:Key="ChatFeedBackground" Color="#10161D"/>
     <SolidColorBrush x:Key="ChatHeaderBackground" Color="#161E27"/>
     <SolidColorBrush x:Key="ChatPickerBackground" Color="#0D141B"/>

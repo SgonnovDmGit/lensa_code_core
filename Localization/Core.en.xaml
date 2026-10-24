@@ -203,4 +203,22 @@
     <sys:String x:Key="str_Dialog_Ok">OK</sys:String>
     <sys:String x:Key="str_GetKeyLink">How to get a key</sys:String>
     <sys:String x:Key="str_OpenLinkFailed">Could not open the page.</sys:String>
+
+    <!-- Композер ядра: подписи режима, модели и подсказки кольца (перенесены из продукта 24.10, общий композер с Universal) -->
+    <sys:String x:Key="str_Model">Model</sys:String>
+    <sys:String x:Key="str_Mode">Mode</sys:String>
+    <sys:String x:Key="str_ModePlanning">Plan</sys:String>
+    <sys:String x:Key="str_ModeAuto">Trust</sys:String>
+    <sys:String x:Key="str_ModeReview">Review</sys:String>
+    <sys:String x:Key="str_ModePlanningHint">Only builds a plan</sys:String>
+    <sys:String x:Key="str_ModeReviewHint">Review, recommendations and sandbox edits</sys:String>
+    <sys:String x:Key="str_ModeAutoHint">AI does everything itself</sys:String>
+    <sys:String x:Key="str_ModelAndReasoning">Model and reasoning level</sys:String>
+    <sys:String x:Key="str_Reasoning">Reasoning</sys:String>
+    <sys:String x:Key="str_CtxTooltipUsed">Context</sys:String>
+    <sys:String x:Key="str_CtxTooltipWindow">Available</sys:String>
+    <sys:String x:Key="str_CtxTooltipFill">Fill</sys:String>
+    <sys:String x:Key="str_CtxTooltipModelWindow">Model window</sys:String>
+    <sys:String x:Key="str_CtxTooltipUnknown">unknown</sys:String>
+
 </ResourceDictionary>
