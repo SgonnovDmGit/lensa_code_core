@@ -165,6 +165,14 @@
     <sys:String x:Key="str_ErrorRequestTooLarge">Запрос слишком большой для сервера. Если это чтение модуля — попросите AI взять его частями. {0}</sys:String>
     <sys:String x:Key="str_ErrorAiRetryAdvice">Смените модель или упростите запрос.</sys:String>
     <sys:String x:Key="str_ErrorTurnStillRunning">Предыдущий ход ещё идёт.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimit">Исчерпан лимит расхода этого ключа.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitDay">Исчерпан дневной лимит расхода этого ключа.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitWeek">Исчерпан недельный лимит расхода этого ключа.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitTotal">Исчерпан общий лимит расхода этого ключа.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitBalanceKept">Монеты на счёте не тронуты.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitLeft">Осталось по лимиту: {0}.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitResets">Лимит обновится {0}.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitNoReset">Общий лимит не обновляется сам — его может поднять администратор.</sys:String>
     <sys:String x:Key="str_Chat_ServerPrefix" xml:space="preserve">Сервер: </sys:String>
     <sys:String x:Key="str_Chat_RetryExhausted">Попытки исчерпаны: {0}/{1}.</sys:String>
     <sys:String x:Key="str_Chat_LastToolFailure">Последний инструмент — {0}: {1}</sys:String>

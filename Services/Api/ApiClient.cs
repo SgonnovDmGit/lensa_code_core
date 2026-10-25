@@ -281,7 +281,12 @@ namespace LenSa.Core.Services.Api
                         case AsyncChatStatus.Abandoned:
                             throw new ApiException(
                                 poll.ErrorCode ?? poll.ServiceInfo?.ErrorCode ?? "AI_REQUEST_FAILED",
-                                poll.ErrorMessage ?? poll.Status);
+                                poll.ErrorMessage ?? poll.Status)
+                            {
+                                KeyWindow = poll.KeyWindow,
+                                KeyResetsAt = poll.KeyResetsAt,
+                                KeyAvailableCoins = poll.KeyAvailableCoins
+                            };
 
                         case AsyncChatStatus.Canceled:
                             throw new ChatTurnCanceledException();
@@ -313,7 +318,10 @@ namespace LenSa.Core.Services.Api
                     {
                         RetryAfterSeconds = error.RetryAfterSeconds,
                         MinLength = error.MinLength,
-                        MaxLength = error.MaxLength
+                        MaxLength = error.MaxLength,
+                        KeyWindow = error.KeyWindow,
+                        KeyResetsAt = error.KeyResetsAt,
+                        KeyAvailableCoins = error.KeyAvailableCoins
                     };
             }
             catch (JsonException) { }
@@ -359,6 +367,17 @@ namespace LenSa.Core.Services.Api
         {
             using var request = CreateRequest(HttpMethod.Get, $"/v1/api/me/usage?page={page}&size={size}");
             return await SendAsync<UsageResponse>(request);
+        }
+
+        /// <summary>
+        /// Почасовой расход «час × модель» (GET /v1/api/me/usage/hourly, v1.64.0). size — число ЧАСОВ
+        /// на странице (1–100), total — число непустых часов; час не делится между страницами.
+        /// </summary>
+        public async Task<HourlyUsageResponse> GetHourlyUsageAsync(int page, int size,
+            CancellationToken cancellationToken = default)
+        {
+            using var request = CreateRequest(HttpMethod.Get, $"/v1/api/me/usage/hourly?page={page}&size={size}");
+            return await SendAsync<HourlyUsageResponse>(request, cancellationToken);
         }
 
         public async Task<RecommendationDto[]> GetRecommendationsAsync(string language)
@@ -604,26 +623,7 @@ namespace LenSa.Core.Services.Api
                 var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
                 if (!response.IsSuccessStatusCode)
-                {
-                    try
-                    {
-                        var error = JsonSerializer.Deserialize<ErrorResponse>(body);
-                        if (error?.ServiceInfo != null)
-                            throw new ApiException(
-                                error.ServiceInfo.ErrorCode ?? "UNKNOWN",
-                                error.Message ?? response.ReasonPhrase ?? "Unknown error")
-                            {
-                                RetryAfterSeconds = error.RetryAfterSeconds,
-                                MinLength = error.MinLength,
-                                MaxLength = error.MaxLength
-                            };
-                    }
-                    catch (JsonException) { }
-
-                    throw new ApiException(
-                        $"HTTP_{(int)response.StatusCode}",
-                        response.ReasonPhrase ?? "Unknown error");
-                }
+                    ThrowFromErrorBody(response, body);
 
                 if (expectedStatus.HasValue && response.StatusCode != expectedStatus.Value)
                     throw new ApiException($"HTTP_{(int)response.StatusCode}", "Unexpected response status");

@@ -165,6 +165,14 @@
     <sys:String x:Key="str_ErrorRequestTooLarge">The request is too large for the server. If this is a module read, ask the AI to take it in parts. {0}</sys:String>
     <sys:String x:Key="str_ErrorAiRetryAdvice">Switch models or simplify the request.</sys:String>
     <sys:String x:Key="str_ErrorTurnStillRunning">The previous turn is still running.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimit">This key's spending limit is used up.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitDay">This key's daily spending limit is used up.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitWeek">This key's weekly spending limit is used up.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitTotal">This key's total spending limit is used up.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitBalanceKept">The coins in your account are untouched.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitLeft">Left within the limit: {0}.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitResets">The limit renews {0}.</sys:String>
+    <sys:String x:Key="str_ErrorKeyLimitNoReset">The total limit does not renew by itself; an administrator can raise it.</sys:String>
     <sys:String x:Key="str_Chat_ServerPrefix" xml:space="preserve">Server: </sys:String>
     <sys:String x:Key="str_Chat_RetryExhausted">Tool attempts exhausted: {0}/{1}.</sys:String>
     <sys:String x:Key="str_Chat_LastToolFailure">Last failed tool — {0}: {1}</sys:String>

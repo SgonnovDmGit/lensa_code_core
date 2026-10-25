@@ -1518,6 +1518,10 @@ namespace LenSa.Core.Chat.ViewModels
             if (ex.ErrorCode == "UPSTREAM_REJECTED")
                 return new CommonErrorPresentation(ex.Message, IsVerbatimServerText: true);
 
+            // 402 KEY_LIMIT_EXCEEDED (ANNOUNCE-013) — потолок ключа, а не баланс: монеты на счёте есть.
+            if (ex.ErrorCode == "KEY_LIMIT_EXCEEDED")
+                return new CommonErrorPresentation(BuildKeyLimitText(ex, resourceResolver));
+
             var key = ex.ErrorCode switch
             {
                 // 400: message длиннее серверного лимита
@@ -1549,6 +1553,46 @@ namespace LenSa.Core.Chat.ViewModels
                 // это был бы отказ поверх отказа. Отдаём хотя бы текст сервера.
                 return new CommonErrorPresentation($"{template} {ex.Message}");
             }
+        }
+
+        private static string BuildKeyLimitText(ApiException ex, Func<string, string?> resourceResolver)
+        {
+            string Text(string key, string fallback) =>
+                resourceResolver(key) is string value && value.Length > 0 ? value : fallback;
+
+            var parts = new List<string>
+            {
+                ex.KeyWindow switch
+                {
+                    "day" => Text("str_ErrorKeyLimitDay", "This key's daily spending limit is used up."),
+                    "week" => Text("str_ErrorKeyLimitWeek", "This key's weekly spending limit is used up."),
+                    "total" => Text("str_ErrorKeyLimitTotal", "This key's total spending limit is used up."),
+                    _ => Text("str_ErrorKeyLimit", "This key's spending limit is used up.")
+                },
+                Text("str_ErrorKeyLimitBalanceKept", "The coins in your account are untouched.")
+            };
+            if (ex.KeyAvailableCoins is decimal left)
+                parts.Add(FormatLocalized(Text("str_ErrorKeyLimitLeft", "Left within the limit: {0}."),
+                    left.ToString("#,0.##", System.Globalization.CultureInfo.CurrentCulture)));
+            if (ex.KeyWindow == "total")
+                parts.Add(Text("str_ErrorKeyLimitNoReset",
+                    "The total limit does not renew by itself; an administrator can raise it."));
+            else if (TryParseZonedTime(ex.KeyResetsAt, out var resetsAt))
+                parts.Add(FormatLocalized(Text("str_ErrorKeyLimitResets", "The limit renews {0}."),
+                    resetsAt.ToString("g", System.Globalization.CultureInfo.CurrentCulture)));
+            return string.Join(" ", parts);
+        }
+
+        // Время без зоны не должно молча получить зону компьютера — такую строку опускаем.
+        private static bool TryParseZonedTime(string? raw, out DateTimeOffset local)
+        {
+            local = default;
+            if (string.IsNullOrWhiteSpace(raw) || !(raw.EndsWith("Z", StringComparison.OrdinalIgnoreCase) ||
+                (raw.Length >= 6 && raw[^3] == ':' && raw[^6] is '+' or '-'))) return false;
+            if (!DateTimeOffset.TryParse(raw, System.Globalization.CultureInfo.InvariantCulture,
+                    System.Globalization.DateTimeStyles.None, out var value)) return false;
+            local = value.ToLocalTime();
+            return true;
         }
 
         protected static string BuildRetryExhaustedSummary(

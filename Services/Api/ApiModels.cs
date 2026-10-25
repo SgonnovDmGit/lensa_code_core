@@ -217,6 +217,17 @@ namespace LenSa.Core.Services.Api
 
         [JsonPropertyName("errorMessage")]
         public string? ErrorMessage { get; set; }
+
+        // Отказ 402 KEY_LIMIT_EXCEEDED (ANNOUNCE-013, сервер v1.63.0): какое окно лимита ключа упёрлось,
+        // когда сбросится (у total нет) и сколько осталось.
+        [JsonPropertyName("keyWindow")]
+        public string? KeyWindow { get; set; }
+
+        [JsonPropertyName("keyResetsAt")]
+        public string? KeyResetsAt { get; set; }
+
+        [JsonPropertyName("keyAvailableCoins")]
+        public decimal? KeyAvailableCoins { get; set; }
     }
 
     public class ChatResponse
@@ -508,6 +519,17 @@ namespace LenSa.Core.Services.Api
 
         [JsonPropertyName("maxLength")]
         public int? MaxLength { get; set; }
+
+        // Отказ 402 KEY_LIMIT_EXCEEDED (ANNOUNCE-013, сервер v1.63.0): какое окно лимита ключа упёрлось,
+        // когда сбросится (у total нет) и сколько осталось.
+        [JsonPropertyName("keyWindow")]
+        public string? KeyWindow { get; set; }
+
+        [JsonPropertyName("keyResetsAt")]
+        public string? KeyResetsAt { get; set; }
+
+        [JsonPropertyName("keyAvailableCoins")]
+        public decimal? KeyAvailableCoins { get; set; }
     }
 
     public sealed class FeedbackResponse
@@ -660,6 +682,12 @@ namespace LenSa.Core.Services.Api
 
         [JsonPropertyName("balanceReservedCoins")]
         public decimal BalanceReservedCoins { get; set; }
+
+        /// <summary>
+        /// Остаток лимита ключа (v1.63.0). null — «нет данных» (лимита нет или Billing не ответил), не ноль.
+        /// </summary>
+        [JsonPropertyName("keyAvailableCoins")]
+        public decimal? KeyAvailableCoins { get; set; }
     }
 
     public class UsageEntry
@@ -695,6 +723,61 @@ namespace LenSa.Core.Services.Api
 
         [JsonPropertyName("total")]
         public int Total { get; set; }
+
+        [JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [JsonPropertyName("size")]
+        public int Size { get; set; }
+    }
+
+    // --- Почасовой расход «час × модель» (v1.64.0, REQ-038) ---
+
+    public class HourlyUsageModel
+    {
+        [JsonPropertyName("model")]
+        public string Model { get; set; } = string.Empty;
+
+        [JsonPropertyName("calls")]
+        public long Calls { get; set; }
+
+        [JsonPropertyName("promptTokens")]
+        public long PromptTokens { get; set; }
+
+        [JsonPropertyName("completionTokens")]
+        public long CompletionTokens { get; set; }
+
+        [JsonPropertyName("totalTokens")]
+        public long TotalTokens { get; set; }
+
+        // decimal, а не double: сервер делит micro-коины один раз, 0.049512 должен дойти без хвоста.
+        [JsonPropertyName("costCoins")]
+        public decimal CostCoins { get; set; }
+    }
+
+    public class HourlyUsageHour
+    {
+        [JsonPropertyName("start")]
+        public string? Start { get; set; }
+
+        [JsonPropertyName("end")]
+        public string? End { get; set; }
+
+        [JsonPropertyName("models")]
+        public HourlyUsageModel[]? Models { get; set; }
+    }
+
+    public class HourlyUsageResponse
+    {
+        [JsonPropertyName("serviceInfo")]
+        public ServiceInfo ServiceInfo { get; set; } = new();
+
+        [JsonPropertyName("hours")]
+        public HourlyUsageHour[]? Hours { get; set; }
+
+        /// <summary>Число непустых часов, не операций и не строк.</summary>
+        [JsonPropertyName("total")]
+        public long Total { get; set; }
 
         [JsonPropertyName("page")]
         public int Page { get; set; }
@@ -1200,6 +1283,9 @@ namespace LenSa.Core.Services.Api
         public int? RetryAfterSeconds { get; init; }
         public int? MinLength { get; init; }
         public int? MaxLength { get; init; }
+        public string? KeyWindow { get; init; }
+        public string? KeyResetsAt { get; init; }
+        public decimal? KeyAvailableCoins { get; init; }
 
         public ApiException(string errorCode, string message) : base(message)
         {
