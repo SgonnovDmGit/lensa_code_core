@@ -744,6 +744,13 @@ namespace LenSa.Core.Services.Api
         [JsonPropertyName("promptTokens")]
         public long PromptTokens { get; set; }
 
+        // v1.72.0 (REQ-039): кеш входит в promptTokens; nullable — «поля нет» ≠ «0».
+        [JsonPropertyName("cacheReadTokens")]
+        public long? CacheReadTokens { get; set; }
+
+        [JsonPropertyName("cacheWriteTokens")]
+        public long? CacheWriteTokens { get; set; }
+
         [JsonPropertyName("completionTokens")]
         public long CompletionTokens { get; set; }
 
